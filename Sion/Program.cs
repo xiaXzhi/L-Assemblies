@@ -97,10 +97,13 @@ namespace Sion
 
         private static void Game_OnGameProcessPacket(GamePacketEventArgs args)
         {
-            if (Config.Item("AntiCamLock").GetValue<bool>() && args.PacketData[0] == Packet.MultiPacket.Header &&
-                args.PacketData[5] == (byte) Packet.MultiPacketType.LockCamera)
+            if (Config.Item("AntiCamLock").GetValue<bool>() && args.PacketData[0] == 0x07)
             {
-                args.Process = false;
+                var gp = new GamePacket(args.PacketData);
+                if (gp.ReadInteger(2) == ObjectManager.Player.NetworkId && gp.ReadByte(8) == 0x61 &&gp.ReadByte(8) == 0x44)
+                {
+                    args.Process = false;
+                }
             }
         }
 
