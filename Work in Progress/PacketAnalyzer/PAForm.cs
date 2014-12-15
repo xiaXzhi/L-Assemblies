@@ -64,7 +64,7 @@ namespace PacketAnalyzer
             }
 
             PGridSend.Rows[hti.RowIndex].Selected = true;
-            textBox1.Text = Program.SendPackets[hti.RowIndex].Dump();
+            textBox1.Text = Program.SendPackets[hti.RowIndex].Dump(false);
         }
 
         private void PGridRecv_MouseDown(object sender, MouseEventArgs e)
@@ -84,7 +84,7 @@ namespace PacketAnalyzer
             }
 
             PGridRecv.Rows[hti.RowIndex].Selected = true;
-            textBox1.Text = Program.RecvPackets[hti.RowIndex].Dump();
+            textBox1.Text = Program.RecvPackets[hti.RowIndex].Dump(false);
         }
     }
 }
