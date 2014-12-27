@@ -63,20 +63,20 @@ namespace Activator
         {
             if (CanIgnite())
             {
-                ObjectManager.Player.SummonerSpellbook.CastSpell(IgniteSlot, unit);
+                ObjectManager.Player.Spellbook.CastSpell(IgniteSlot, unit);
             }
         }
 
         private static bool CanIgnite()
         {
             return IgniteSlot != SpellSlot.Unknown &&
-                   ObjectManager.Player.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready;
+                   ObjectManager.Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready;
         }
 
         private static bool HasSummoner(Obj_AI_Hero enemy, string name)
         {
             var slot = enemy.GetSpellSlot(name);
-            return slot != SpellSlot.Unknown && enemy.SummonerSpellbook.GetSpell(slot).State == SpellState.Ready;
+            return slot != SpellSlot.Unknown && enemy.Spellbook.GetSpell(slot).State == SpellState.Ready;
         }
     }
 }

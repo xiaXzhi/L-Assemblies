@@ -61,7 +61,8 @@ namespace Activator
 
         private static void CastPotion(PotionType type)
         {
-            Player.InventoryItems.First(item => item.Id == (type == PotionType.Health ? (ItemId)2003 : (ItemId)2004) || (item.Id == (ItemId)2010) || (item.Id == (ItemId)2041 && item.Charges > 0)).UseItem();
+            var itemSlot = Player.InventoryItems.First(item => item.Id == (type == PotionType.Health ? (ItemId)2003 : (ItemId)2004) || (item.Id == (ItemId)2010) || (item.Id == (ItemId)2041 && item.Charges > 0));
+            Player.Spellbook.CastSpell(itemSlot.SpellSlot, Player);
         }
     }
 }

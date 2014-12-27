@@ -450,9 +450,9 @@ namespace Activator
         private static void CastExhaust(GameObject unit)
         {
             if (ExhaustSlot != SpellSlot.Unknown &&
-                ObjectManager.Player.SummonerSpellbook.CanUseSpell(ExhaustSlot) == SpellState.Ready)
+                ObjectManager.Player.Spellbook.CanUseSpell(ExhaustSlot) == SpellState.Ready)
             {
-                ObjectManager.Player.SummonerSpellbook.CastSpell(ExhaustSlot, unit);
+                ObjectManager.Player.Spellbook.CastSpell(ExhaustSlot, unit);
             }
         }
 
