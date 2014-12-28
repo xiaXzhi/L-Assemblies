@@ -56,7 +56,7 @@ namespace Evelynn
             Config = new Menu(ChampionName, ChampionName, true);
 
             var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
-            SimpleTs.AddToMenu(targetSelectorMenu);
+            TargetSelector.AddToMenu(targetSelectorMenu);
             Config.AddSubMenu(targetSelectorMenu);
 
             //Orbwalker submenu
@@ -153,7 +153,7 @@ namespace Evelynn
 
         private static void Combo()
         {
-            var target = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.True);
+            var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.True);
 
             if (target != null)
             {
