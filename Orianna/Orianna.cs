@@ -51,7 +51,7 @@ namespace Orianna
 
             //Add the target selector to the menu as submenu.
             var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
-            SimpleTs.AddToMenu(targetSelectorMenu);
+            TargetSelector.AddToMenu(targetSelectorMenu);
             Config.AddSubMenu(targetSelectorMenu);
 
             //Load the orbwalker and add it to the menu as submenu.
@@ -221,15 +221,20 @@ namespace Orianna
         }
 
         // TODO: add w
-        private static void Orbwalking_OnNonKillableMinion(Obj_AI_Base minion)
+        private static void Orbwalking_OnNonKillableMinion(AttackableUnit minion)
         {
-            var useQi = Config.Item("UseQFarm").GetValue<StringList>().SelectedIndex;
-
-            if (Config.Item("FreezeActive").GetValue<KeyBind>().Active && (useQi == 0 || useQi == 2) && Q.IsReady() &&
-                minion.IsValidTarget(Q.Range + Q.Width) && Q.GetHealthPrediction(minion) > 0)
+            if (minion is Obj_AI_Minion)
             {
-                Q.Cast(minion);
+                var leMinion = (Obj_AI_Minion)minion;
+                var useQi = Config.Item("UseQFarm").GetValue<StringList>().SelectedIndex;
+
+                if (Config.Item("FreezeActive").GetValue<KeyBind>().Active && (useQi == 0 || useQi == 2) && Q.IsReady() &&
+                    minion.IsValidTarget(Q.Range + Q.Width) && Q.GetHealthPrediction(leMinion) > 0)
+                {
+                    Q.Cast(leMinion);
+                }
             }
+            
         }
 
         private static void Interrupter_OnPossibleToInterrupt(Obj_AI_Base unit, InterruptableSpell spell)
@@ -314,8 +319,8 @@ namespace Orianna
             var useR = (combo && Config.Item("UseRCombo").GetValue<bool>());
             var useI = (combo && Config.Item("UseIgniteCombo").GetValue<bool>());
 
-            var qTarget = SimpleTs.GetTarget(Q.Range + Q.Width, SimpleTs.DamageType.Magical);
-            var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Magical);
+            var qTarget = TargetSelector.GetTarget(Q.Range + Q.Width, TargetSelector.DamageType.Magical);
+            var eTarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
 
             if (qTarget != null)
             {
@@ -342,7 +347,7 @@ namespace Orianna
                 }
 
                 if (useI && IgniteSlot != SpellSlot.Unknown &&
-                    ObjectManager.Player.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+                    ObjectManager.Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
                 {
                     dmg += ObjectManager.Player.GetSummonerSpellDamage(qTarget, Damage.SummonerSpell.Ignite);
                 }
@@ -369,10 +374,10 @@ namespace Orianna
                 }
 
                 if (useI && IgniteSlot != SpellSlot.Unknown &&
-                    ObjectManager.Player.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready &&
+                    ObjectManager.Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready &&
                     dmg > qTarget.Health)
                 {
-                    ObjectManager.Player.SummonerSpellbook.CastSpell(IgniteSlot, qTarget);
+                    ObjectManager.Player.Spellbook.CastSpell(IgniteSlot, qTarget);
                 }
             }
 
