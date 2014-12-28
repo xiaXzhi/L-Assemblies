@@ -114,7 +114,7 @@ namespace Darius
                 ExecuteHarass();
         }
 
-        private static void Orbwalking_AfterAttack(Obj_AI_Base unit, Obj_AI_Base target)
+        private static void Orbwalking_AfterAttack(AttackableUnit unit, AttackableUnit target)
         {
             if (_config.Item("ComboActive").GetValue<KeyBind>().Active && _config.Item("UseWCombo").GetValue<bool>() &&
                 unit.IsMe && (target is Obj_AI_Hero))
@@ -159,7 +159,7 @@ namespace Darius
             var c =
                 (from hero in ObjectManager.Get<Obj_AI_Hero>()
                     where hero.IsValidTarget()
-                    select ObjectManager.Player.Distance(hero)).Count(dist => dist > 270 && dist <= _q.Range);
+                    select ObjectManager.Player.Distance(hero, false)).Count(dist => dist > 270 && dist <= _q.Range);
 
             if (c > 0)
                 _q.Cast();
@@ -172,11 +172,11 @@ namespace Darius
                 CastR(champion);
                 if (_r.IsReady()) continue;
 
-                if (IgniteSlot != SpellSlot.Unknown && ObjectManager.Player.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready && ObjectManager.Player.Distance(champion) < 600)
+                if (IgniteSlot != SpellSlot.Unknown && ObjectManager.Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready && ObjectManager.Player.Distance(champion, false) < 600)
                 {
                     if (ObjectManager.Player.GetSummonerSpellDamage(champion, Damage.SummonerSpell.Ignite) > champion.Health)
                     {
-                        ObjectManager.Player.SummonerSpellbook.CastSpell(IgniteSlot, champion);
+                        ObjectManager.Player.Spellbook.CastSpell(IgniteSlot, champion);
                     }
                 }
             }
@@ -184,27 +184,27 @@ namespace Darius
 
         private static void ExecuteSkills()
         {
-            var target = SimpleTs.GetTarget(_e.Range, SimpleTs.DamageType.Physical);
+            var target = TargetSelector.GetTarget(_e.Range, TargetSelector.DamageType.Physical);
             if (target == null) return;
 
             if (_e.IsReady() && _config.Item("UseECombo").GetValue<bool>() &&
-                ObjectManager.Player.Distance(target) <= _e.Range)
+                ObjectManager.Player.Distance(target, false) <= _e.Range)
                 _e.Cast(target.ServerPosition);
 
             if (_q.IsReady() && _config.Item("UseQCombo").GetValue<bool>() &&
-                ObjectManager.Player.Distance(target) <= _q.Range)
+                ObjectManager.Player.Distance(target, false) <= _q.Range)
                 _q.Cast();
 
             if (_r.IsReady() && _config.Item("UseRCombo").GetValue<bool>() &&
-                ObjectManager.Player.Distance(target) <= _r.Range)
+                ObjectManager.Player.Distance(target, false) <= _r.Range)
                 CastR(target);
 
             if (_r.IsReady()) return;
-            if (IgniteSlot != SpellSlot.Unknown && ObjectManager.Player.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready && ObjectManager.Player.Distance(target) < 600)
+            if (IgniteSlot != SpellSlot.Unknown && ObjectManager.Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready && ObjectManager.Player.Distance(target, false) < 600)
             {
                 if (ObjectManager.Player.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite) > target.Health)
                 {
-                    ObjectManager.Player.SummonerSpellbook.CastSpell(IgniteSlot, target);
+                    ObjectManager.Player.Spellbook.CastSpell(IgniteSlot, target);
                 }
             }
         }
