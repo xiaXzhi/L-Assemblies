@@ -97,7 +97,7 @@ namespace Annie
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalker"));
 
             var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
-            SimpleTs.AddToMenu(targetSelectorMenu);
+            TargetSelector.AddToMenu(targetSelectorMenu);
 
             Config.AddSubMenu(targetSelectorMenu);
             Config.AddSubMenu(new Menu("Combo settings", "combo"));
@@ -200,8 +200,8 @@ namespace Annie
 
         private static void OnGameUpdate(EventArgs args)
         {
-            var target = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
-            var flashRtarget = SimpleTs.GetTarget(900, SimpleTs.DamageType.Magical);
+            var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+            var flashRtarget = TargetSelector.GetTarget(900, TargetSelector.DamageType.Magical);
 
             switch (Orbwalker.ActiveMode)
             {
@@ -271,7 +271,7 @@ namespace Annie
                         DoingCombo = Environment.TickCount;
                         Q.Cast(target, Config.Item("PCast").GetValue<bool>());
                         Utility.DelayAction.Add(
-                            (int) (ObjectManager.Player.Distance(target) / Q.Speed * 1000 - Game.Ping / 2.0)+250,
+                            (int) (ObjectManager.Player.Distance(target, false) / Q.Speed * 1000 - Game.Ping / 2.0)+250,
                             () =>
                             {
                                 if (R.IsReady() &&
@@ -290,7 +290,7 @@ namespace Annie
 
                     break;
                 case 4:
-                    if (ObjectManager.Player.SummonerSpellbook.CanUseSpell(FlashSlot) == SpellState.Ready && R.IsReady() &&
+                    if (ObjectManager.Player.Spellbook.CanUseSpell(FlashSlot) == SpellState.Ready && R.IsReady() &&
                         target == null)
                     {
                         var position = R1.GetPrediction(flashRtarget, true).CastPosition;
@@ -299,7 +299,7 @@ namespace Annie
                             GetEnemiesInRange(flashRtarget.ServerPosition, 250) >=
                             Config.Item("flashCombo").GetValue<Slider>().Value)
                         {
-                            ObjectManager.Player.SummonerSpellbook.CastSpell(FlashSlot, position);
+                            ObjectManager.Player.Spellbook.CastSpell(FlashSlot, position);
                         }
 
                         Items.UseItem(3128, flashRtarget);
@@ -347,11 +347,11 @@ namespace Annie
             }
 
             if (IgniteSlot != SpellSlot.Unknown && target != null &&
-                ObjectManager.Player.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready &&
-                ObjectManager.Player.Distance(target) < 600 &&
+                ObjectManager.Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready &&
+                ObjectManager.Player.Distance(target, false) < 600 &&
                 ObjectManager.Player.GetSpellDamage(target, IgniteSlot) > target.Health)
             {
-                ObjectManager.Player.SummonerSpellbook.CastSpell(IgniteSlot, target);
+                ObjectManager.Player.Spellbook.CastSpell(IgniteSlot, target);
             }
         }
 
