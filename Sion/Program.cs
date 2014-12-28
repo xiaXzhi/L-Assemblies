@@ -49,7 +49,7 @@ namespace Sion
 
             //Add the target selector to the menu as submenu.
             var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
-            SimpleTs.AddToMenu(targetSelectorMenu);
+            TargetSelector.AddToMenu(targetSelectorMenu);
             Config.AddSubMenu(targetSelectorMenu);
 
             //Load the orbwalker and add it to the menu as submenu.
@@ -122,10 +122,10 @@ namespace Sion
 
             if (Config.Item("ComboActive").GetValue<KeyBind>().Active)
             {
-                var qTarget = SimpleTs.GetTarget(
-                    !Q.IsCharging ? Q.ChargedMaxRange / 2 : Q.ChargedMaxRange, SimpleTs.DamageType.Physical);
+                var qTarget = TargetSelector.GetTarget(
+                    !Q.IsCharging ? Q.ChargedMaxRange / 2 : Q.ChargedMaxRange, TargetSelector.DamageType.Physical);
 
-                var eTarget = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Physical);
+                var eTarget = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
 
                 if (qTarget != null && Config.Item("UseQCombo").GetValue<bool>())
                 {
