@@ -152,7 +152,7 @@ namespace Orianna
             Config.AddToMainMenu();
 
             Drawing.OnDraw += Drawing_OnDraw;
-            Game.OnGameSendPacket += Game_OnGameSendPacket;
+            Spellbook.OnCastSpell += Spellbook_OnCastSpell;
             Game.OnGameUpdate += Game_OnGameUpdate;
             Interrupter.OnPossibleToInterrupt += Interrupter_OnPossibleToInterrupt;
             Orbwalking.OnNonKillableMinion += Orbwalking_OnNonKillableMinion;
@@ -200,23 +200,14 @@ namespace Orianna
             }
         }
 
-        private static void Game_OnGameSendPacket(GamePacketEventArgs args)
+        private static void Spellbook_OnCastSpell(GameObject sender, SpellbookCastSpellEventArgs args)
         {
-            if (args.PacketData[0] != Packet.C2S.Cast.Header)
+            if (sender.IsMe && args.Slot == SpellSlot.R)
             {
-                return;
-            }
-
-            var decodedPacket = Packet.C2S.Cast.Decoded(args.PacketData);
-            if (decodedPacket.SourceNetworkId != ObjectManager.Player.NetworkId || decodedPacket.Slot != SpellSlot.R)
-            {
-                return;
-            }
-            ;
-
-            if (Math.Abs(R.GetHitCount()) < float.Epsilon)
-            {
-                args.Process = false;
+                if (Math.Abs(R.GetHitCount()) < float.Epsilon)
+                {
+                    args.Process = false;
+                }
             }
         }
 
