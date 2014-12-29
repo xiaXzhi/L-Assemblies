@@ -105,7 +105,7 @@ namespace Evelynn
             //Add the events we are going to use:
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnGameUpdate += Game_OnGameUpdate;
-            Game.OnGameSendPacket += Game_OnGameSendPacket;
+            Spellbook.OnCastSpell += Spellbook_OnCastSpell;
         }
 
         private static void Drawing_OnDraw(EventArgs args)
@@ -135,20 +135,17 @@ namespace Evelynn
                 JungleFarm();
         }
 
-        private static void Game_OnGameSendPacket(GamePacketEventArgs args)
+        private static void Spellbook_OnCastSpell(GameObject sender, SpellbookCastSpellEventArgs args)
         {
-            if (args.PacketData[0] != Packet.C2S.Cast.Header) return;
-
-            var decodedPacket = Packet.C2S.Cast.Decoded(args.PacketData);
-            if (decodedPacket.SourceNetworkId != ObjectManager.Player.NetworkId || decodedPacket.Slot != SpellSlot.R)
-                return;
-
-            if (ObjectManager.Get<Obj_AI_Hero>()
+            if (sender.IsMe && args.Slot == SpellSlot.R)
+            {
+                if (ObjectManager.Get<Obj_AI_Hero>()
                 .Count(
                     hero =>
                         hero.IsValidTarget() &&
-                        hero.Distance(new Vector2(decodedPacket.ToX, decodedPacket.ToY)) <= R.Range) == 0)
-                args.Process = false;
+                        hero.Distance(new Vector2(args.EndPosition.X, args.EndPosition.Y)) <= R.Range) == 0)
+                    args.Process = false;
+            }
         }
 
         private static void Combo()
