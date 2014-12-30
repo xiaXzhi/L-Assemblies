@@ -34,7 +34,7 @@ namespace Activator
 
         private static bool Disallowed()
         {
-            return (Player.HasBuff("Recall") || Utility.InFountain()); 
+            return (Player.HasBuff("Recall") || ObjectManager.Player.InFountain() || ObjectManager.Player.InShop()); 
         }
 
         private static void OnGameUpdate(EventArgs args)
