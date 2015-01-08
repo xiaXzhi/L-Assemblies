@@ -229,7 +229,7 @@ namespace Annie
 
         private static void ChargeStun()
         {
-            if (ObjectManager.Player.HasBuff("pyromania_particle", true) || ObjectManager.Player.IsDead)
+            if (StunCount == 4 || ObjectManager.Player.IsDead)
             {
                 return;
             }
