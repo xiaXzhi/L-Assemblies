@@ -25,18 +25,14 @@ namespace Annie
         public const string CharName = "Annie";
         public static Orbwalking.Orbwalker Orbwalker;
         public static List<Spell> SpellList = new List<Spell>();
-
         public static Spell Q;
         public static Spell W;
         public static Spell E;
         public static Spell R;
         public static Spell R1;
-
-        public static float DoingCombo = 0;
-
+        public static float DoingCombo;
         public static SpellSlot IgniteSlot;
         public static SpellSlot FlashSlot;
-
         public static Menu Config;
 
         private static int StunCount
@@ -62,7 +58,7 @@ namespace Annie
 
         private static void Main(string[] args)
         {
-            CustomEvents.Game.OnGameLoad += Game_OnGameLoad;    
+            CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
         }
 
         private static void Game_OnGameLoad(EventArgs args)
@@ -126,7 +122,11 @@ namespace Annie
             Config.SubMenu("misc").AddItem(new MenuItem("PCast", "Packet Cast Spells").SetValue(true));
             Config.SubMenu("misc").AddItem(new MenuItem("autoShield", "Auto shield agaisnt AAs").SetValue(false));
             Config.SubMenu("misc").AddItem(new MenuItem("suppMode", "Support mode").SetValue(false));
-            
+            Config.SubMenu("misc").AddItem(new MenuItem("FountainPassive", "Charge Stun in Fountain").SetValue(true));
+            Config.SubMenu("misc").AddItem(new MenuItem("LanePassive", "Charge Stun In Lane").SetValue(true));
+            Config.SubMenu("misc")
+                .AddItem(new MenuItem("LanePassivePercent", "Min Mana % to Charge").SetValue(new Slider(60)));
+
             Config.SubMenu("draw")
                 .AddItem(
                     new MenuItem("QDraw", "Draw Disintegrate (Q) Range").SetValue(
@@ -143,7 +143,7 @@ namespace Annie
                 .AddItem(
                     new MenuItem("R1Draw", "Draw Flash -> R combo Range").SetValue(
                         new Circle(true, Color.FromArgb(128, 128, 0, 128))));
-            
+
             Config.AddToMainMenu();
 
             Drawing.OnDraw += OnDraw;
@@ -193,7 +193,7 @@ namespace Annie
                     ObjectManager.GetUnitByNetworkId<Obj_AI_Base>(missile.SpellCaster.NetworkId)
                         .BasicAttack.MissileSpeed * 1000 > ecd)
                 {
-                    Utility.DelayAction.Add(ecd, () => E.Cast(ObjectManager.Player,true));
+                    Utility.DelayAction.Add(ecd, () => E.Cast(ObjectManager.Player, true));
                 }
             }
         }
@@ -203,6 +203,7 @@ namespace Annie
             var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             var flashRtarget = TargetSelector.GetTarget(900, TargetSelector.DamageType.Magical);
 
+            ChargeStun();
             switch (Orbwalker.ActiveMode)
             {
                 case Orbwalking.OrbwalkingMode.Combo:
@@ -213,7 +214,7 @@ namespace Annie
                 case Orbwalking.OrbwalkingMode.Mixed:
                     if (Config.Item("suppMode").GetValue<bool>())
                     {
-                        Farm(false); 
+                        Farm(false);
                     }
                     Harass(target);
                     break;
@@ -223,6 +224,35 @@ namespace Annie
                 case Orbwalking.OrbwalkingMode.LaneClear:
                     Farm(true);
                     break;
+            }
+        }
+
+        private static void ChargeStun()
+        {
+            if (ObjectManager.Player.HasBuff("pyromania_particle") || ObjectManager.Player.IsDead)
+            {
+                return;
+            }
+
+            if (Config.Item("FountainPassive").GetValue<bool>() && ObjectManager.Player.InFountain())
+            {
+                if (E.IsReady())
+                {
+                    E.Cast();
+                    return;
+                }
+
+                if (W.IsReady())
+                {
+                    W.Cast(Game.CursorPos);
+                }
+                return;
+            }
+
+            if (Config.Item("LanePassive").GetValue<bool>() && E.IsReady() &&
+                ObjectManager.Player.ManaPercentage() >= Config.Item("LanePassivePercent").GetValue<Slider>().Value)
+            {
+                E.Cast();
             }
         }
 
@@ -255,7 +285,7 @@ namespace Annie
                 Items.UseItem(3128, target);
             }
 
-            
+
             var useQ = Config.Item("qCombo").GetValue<bool>();
             var useW = Config.Item("wCombo").GetValue<bool>();
             var useR = Config.Item("rCombo").GetValue<bool>();
@@ -271,8 +301,8 @@ namespace Annie
                         DoingCombo = Environment.TickCount;
                         Q.Cast(target, Config.Item("PCast").GetValue<bool>());
                         Utility.DelayAction.Add(
-                            (int) (ObjectManager.Player.Distance(target, false) / Q.Speed * 1000 - Game.Ping / 2.0)+250,
-                            () =>
+                            (int) (ObjectManager.Player.Distance(target, false) / Q.Speed * 1000 - Game.Ping / 2.0) +
+                            250, () =>
                             {
                                 if (R.IsReady() &&
                                     !(ObjectManager.Player.GetSpellDamage(target, SpellSlot.R) > target.Health))
@@ -316,7 +346,8 @@ namespace Annie
                     }
                     else if (target != null)
                     {
-                        if (R.IsReady() && useR && !(ObjectManager.Player.GetSpellDamage(target, SpellSlot.R) * 0.6 > target.Health))
+                        if (R.IsReady() && useR &&
+                            !(ObjectManager.Player.GetSpellDamage(target, SpellSlot.R) * 0.6 > target.Health))
                         {
                             R.Cast(target, false, true);
                         }
@@ -383,7 +414,9 @@ namespace Annie
                     minions.OrderByDescending(Minions => Minions.MaxHealth)
                         .Where(minion => minion.IsValidTarget(Q.Range))
                 let predictedHealth = Q.GetHealthPrediction(minion)
-                where predictedHealth < ObjectManager.Player.GetSpellDamage(minion, SpellSlot.Q) * 0.85 && predictedHealth > 0
+                where
+                    predictedHealth < ObjectManager.Player.GetSpellDamage(minion, SpellSlot.Q) * 0.85 &&
+                    predictedHealth > 0
                 select minion)
             {
                 Q.CastOnUnit(minion, Config.Item("PCast").GetValue<bool>());
