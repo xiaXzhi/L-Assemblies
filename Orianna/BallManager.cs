@@ -37,7 +37,7 @@ namespace Orianna
 
             foreach (var ally in
                 ObjectManager.Get<Obj_AI_Hero>()
-                    .Where(ally => ally.IsAlly && !ally.IsDead && ally.HasBuff("orianaghost", true)))
+                    .FindAll(ally => ally.IsAlly && !ally.IsDead && ally.HasBuff("orianaghost", true)))
             {
                 CurrentBallPosition = ally.ServerPosition;
                 CurrentBallPositionDraw = ally.Position;
@@ -48,7 +48,7 @@ namespace Orianna
 
         private static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-            if (!sender.IsMe || ObjectManager.Player.GetSpellSlot(args.SData.Name, false) != SpellSlot.Q)
+            if (!sender.IsMe || ObjectManager.Player.GetSpellSlot(args.SData.Name) != SpellSlot.Q)
             {
                 return;
             }

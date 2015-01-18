@@ -169,7 +169,7 @@ namespace Orianna
 
                 if (menuItem.Active)
                 {
-                    Utility.DrawCircle(position, spell.Range, menuItem.Color);
+                    Render.Circle.DrawCircle(position, spell.Range, menuItem.Color);
                 }
             }
         }
@@ -200,9 +200,9 @@ namespace Orianna
             }
         }
 
-        private static void Spellbook_OnCastSpell(GameObject sender, SpellbookCastSpellEventArgs args)
+        private static void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
         {
-            if (sender.IsMe && args.Slot == SpellSlot.R)
+            if (sender.Owner.IsMe && args.Slot == SpellSlot.R)
             {
                 if (Math.Abs(R.GetHitCount()) < float.Epsilon)
                 {
@@ -262,19 +262,18 @@ namespace Orianna
 
             if (CheckHitE(target, ObjectManager.Player))
             {
-                Packet.C2S.Cast.Encoded(new Packet.C2S.Cast.Struct(ObjectManager.Player.NetworkId, SpellSlot.E)).Send();
+                E.Cast(ObjectManager.Player);
                 return;
             }
 
-            foreach (var alliedHero in
-                ObjectManager.Get<Obj_AI_Hero>().Where(hero => hero.IsValidTarget(E.Range, false) && hero.IsAlly))
+            foreach (var alliedHero in ObjectManager.Get<Obj_AI_Hero>().FindAll(hero => hero.IsValidTarget(E.Range, false) && hero.IsAlly))
             {
                 if (CheckHitE(target, alliedHero) ||
                     (allValid &&
                      ObjectManager.Get<Obj_AI_Hero>()
                          .Any(enemyHero => enemyHero.IsValidTarget() && CheckHitE(enemyHero, alliedHero))))
                 {
-                    Packet.C2S.Cast.Encoded(new Packet.C2S.Cast.Struct(alliedHero.NetworkId, SpellSlot.E)).Send();
+                    E.Cast(alliedHero);
                     return;
                 }
             }
@@ -409,7 +408,7 @@ namespace Orianna
                 else
                 {
                     foreach (var minion in
-                        allMinionsQ.Where(
+                        allMinionsQ.FindAll(
                             minion =>
                                 !Orbwalking.InAutoAttackRange(minion) && minion.Health < 0.75 * Q.GetDamage(minion)))
                     {
@@ -436,7 +435,7 @@ namespace Orianna
                 {
                     // ReSharper disable once UnusedVariable
                     foreach (var minion in
-                        allMinionsW.Where(
+                        allMinionsW.FindAll(
                             minion =>
                                 !Orbwalking.InAutoAttackRange(minion) && minion.Health < 0.75 * W.GetDamage(minion)))
                     {
