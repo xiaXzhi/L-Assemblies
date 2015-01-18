@@ -114,7 +114,7 @@ namespace Evelynn
             {
                 var menuItem = Config.Item(spell.Slot + "Range").GetValue<Circle>();
                 if (menuItem.Active)
-                    Utility.DrawCircle(ObjectManager.Player.Position, spell.Range, menuItem.Color);
+                    Render.Circle.DrawCircle(ObjectManager.Player.Position, spell.Range, menuItem.Color);
             }
         }
 
@@ -135,9 +135,9 @@ namespace Evelynn
                 JungleFarm();
         }
 
-        private static void Spellbook_OnCastSpell(GameObject sender, SpellbookCastSpellEventArgs args)
+        private static void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
         {
-            if (sender.IsMe && args.Slot == SpellSlot.R)
+            if (sender.Owner.IsMe && args.Slot == SpellSlot.R)
             {
                 if (ObjectManager.Get<Obj_AI_Hero>()
                 .Count(
@@ -189,7 +189,7 @@ namespace Evelynn
         {
             var minions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range);
 
-            foreach (var minion in minions.Where(minion => minion.IsValidTarget(Q.Range)))
+            foreach (var minion in minions.FindAll(minion => minion.IsValidTarget(Q.Range)))
             {
                 if (Config.Item("UseQLaneClear").GetValue<bool>() && Q.IsReady())
                     Q.Cast();
