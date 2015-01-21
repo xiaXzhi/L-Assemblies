@@ -43,6 +43,12 @@ namespace Tracker
             "SummonerOdinGarrison", "SummonerRevive", "SummonerSmite", "SummonerTeleport"
         };
 
+        public static string[] SmiteNames =
+        {
+            "s5_summonersmiteplayerganker", "s5_summonersmitequick",
+            "s5_summonersmiteduel", "itemsmiteaoe"
+        };
+
         static HbTracker()
         {
             try
@@ -222,9 +228,21 @@ namespace Tracker
                     foreach (var sSlot in SummonerSpellSlots)
                     {
                         var spell = hero.Spellbook.GetSpell(sSlot);
-                        var texture = SummonerTextures.ContainsKey(spell.Name)
-                            ? SummonerTextures[spell.Name]
-                            : SummonerTextures["SummonerBarrier"];
+                        Texture texture;
+
+                        if (SummonerTextures.ContainsKey(spell.Name))
+                        {
+                            texture = SummonerTextures[spell.Name];
+                        }
+                        else if (SmiteNames.Contains(spell.Name))
+                        {
+                            texture = SummonerTextures["SummonerSmite"];
+                        }
+                        else
+                        {
+                            texture = SummonerTextures["SummonerBarrier"];
+                        }
+
                         var t = spell.CooldownExpires - Game.Time;
 
                         var percent = (Math.Abs(spell.Cooldown) > float.Epsilon) ? t / spell.Cooldown : 1f;
