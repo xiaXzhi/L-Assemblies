@@ -150,10 +150,7 @@ namespace Sion
 
                             if (qTarget.ServerPosition.To2D().Distance(A, B, true, true) < 50 * 50)
                             {
-                                Packet.C2S.ChargedCast.Encoded(
-                                    new Packet.C2S.ChargedCast.Struct(
-                                        (SpellSlot) ((byte) Q.Slot), Game.CursorPos.X, Game.CursorPos.X,
-                                        Game.CursorPos.X)).Send();
+                                Q.Cast(qTarget, true);
                             }
                         }
                         return;
