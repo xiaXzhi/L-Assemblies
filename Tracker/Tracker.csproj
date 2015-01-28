@@ -33,17 +33,23 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="clipper_library">
+      <HintPath>..\..\..\..\Desktop\LeagueSharpLoader\bin\Release\System\clipper_library.dll</HintPath>
+    </Reference>
     <Reference Include="LeagueSharp">
-      <HintPath>C:\Users\Andre\Google Drive\lsharp\System\LeagueSharp.dll</HintPath>
+      <HintPath>..\..\..\..\Desktop\LeagueSharpLoader\bin\Release\System\LeagueSharp.dll</HintPath>
     </Reference>
     <Reference Include="LeagueSharp.Common">
-      <HintPath>C:\Users\Andre\Google Drive\lsharp\System\LeagueSharp.Common.dll</HintPath>
+      <HintPath>..\..\..\..\Desktop\LeagueSharpLoader\bin\Release\System\LeagueSharp.Common.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX">
-      <HintPath>C:\Users\Andre\Google Drive\lsharp\System\SharpDX.dll</HintPath>
+      <HintPath>..\..\..\..\Desktop\LeagueSharpLoader\bin\Release\System\SharpDX.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX.Direct3D9">
-      <HintPath>C:\Users\Andre\Google Drive\lsharp\System\SharpDX.Direct3D9.dll</HintPath>
+      <HintPath>..\..\..\..\Desktop\LeagueSharpLoader\bin\Release\System\SharpDX.Direct3D9.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpDX.XInput">
+      <HintPath>..\..\..\..\Desktop\LeagueSharpLoader\bin\Release\System\SharpDX.XInput.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -122,6 +128,18 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Minimap_Ward_Pink_Enemy.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\itemsmiteaoe.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\s5_summonersmiteduel.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\s5_summonersmiteplayerganker.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\s5_summonersmitequick.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
