@@ -147,7 +147,7 @@ namespace Annie
             Config.AddToMainMenu();
 
             Drawing.OnDraw += OnDraw;
-            Game.OnGameUpdate += OnGameUpdate;
+            Game.OnUpdate += OnGameUpdate;
             GameObject.OnCreate += OnCreateObject;
             Orbwalking.BeforeAttack += OrbwalkingBeforeAttack;
 

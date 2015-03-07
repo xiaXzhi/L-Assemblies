@@ -153,7 +153,7 @@ namespace Orianna
 
             Drawing.OnDraw += Drawing_OnDraw;
             Spellbook.OnCastSpell += Spellbook_OnCastSpell;
-            Game.OnGameUpdate += Game_OnGameUpdate;
+            Game.OnUpdate += Game_OnGameUpdate;
             Interrupter.OnPossibleToInterrupt += Interrupter_OnPossibleToInterrupt;
             Orbwalking.OnNonKillableMinion += Orbwalking_OnNonKillableMinion;
         }

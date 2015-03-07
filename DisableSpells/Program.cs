@@ -132,7 +132,7 @@ namespace DisableSpells
             Config.AddToMainMenu();
 
             Game.PrintChat("Exploit loaded!");
-            Game.OnGameUpdate += Game_OnGameUpdate;
+            Game.OnUpdate += Game_OnGameUpdate;
         }
 
         private static void Game_OnGameUpdate(EventArgs args)

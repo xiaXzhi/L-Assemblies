@@ -66,7 +66,7 @@ namespace Cho_Gath
             Config.AddToMainMenu();
 
             Drawing.OnDraw    += Drawing_OnDraw;
-            Game.OnGameUpdate += Game_OnGameUpdate;
+            Game.OnUpdate += Game_OnGameUpdate;
             Interrupter.OnPossibleToInterrupt += Interrupter_OnPosibleToInterrupt;
         }
 

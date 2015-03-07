@@ -34,8 +34,8 @@ namespace PacketAnalyzer
         private static void Main(string[] args)
         {
           //  CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
-            Game.OnGameSendPacket += Game_OnGameSendPacket;
-            Game.OnGameProcessPacket += Game_OnGameProcessPacket;
+            Game.OnSendPacket += Game_OnGameSendPacket;
+            Game.OnProcessPacket += Game_OnGameProcessPacket;
             AppDomain.CurrentDomain.DomainUnload += CurrentDomain_DomainUnload;
             AppDomain.CurrentDomain.ProcessExit += CurrentDomain_DomainUnload;
             //     AppDomain.CurrentDomain.UnhandledException += CurrentDomain_DomainUnload;

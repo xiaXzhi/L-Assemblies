@@ -19,7 +19,7 @@ namespace Activator
                 return;
             }
 
-            Game.OnGameUpdate += OnGameUpdate;
+            Game.OnUpdate += OnGameUpdate;
         }
 
         public static void AddToMenu(Menu menu)

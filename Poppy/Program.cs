@@ -78,7 +78,7 @@ namespace Poppy
             Config.AddToMainMenu();
 
             //Add the Events we need
-            Game.OnGameUpdate += Game_OnGameUpdate;
+            Game.OnUpdate += Game_OnGameUpdate;
             Orbwalking.AfterAttack += Orbwalking_AfterAttack;
             Drawing.OnDraw += Drawing_OnDraw;
         }

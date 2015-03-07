@@ -75,8 +75,8 @@ namespace Sion
             Config.AddToMainMenu();
 
             Game.PrintChat("Sion Loaded!");
-            Game.OnGameUpdate += Game_OnGameUpdate;
-            Game.OnGameProcessPacket += Game_OnGameProcessPacket;
+            Game.OnUpdate += Game_OnGameUpdate;
+            Game.OnProcessPacket += Game_OnGameProcessPacket;
             Drawing.OnDraw += Drawing_OnDraw;
             Obj_AI_Base.OnProcessSpellCast += ObjAiHeroOnOnProcessSpellCast;
         }
