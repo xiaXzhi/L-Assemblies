@@ -212,8 +212,7 @@ namespace Tracker
                 }
 
                 foreach (var hero in
-                    ObjectManager.Get<Obj_AI_Hero>()
-                        .Where(
+                    HeroManager.AllHeroes.Where(
                             hero =>
                                 hero != null && hero.IsValid && (!hero.IsMe || Config.Item("TrackMe").GetValue<bool>()) &&
                                 hero.IsHPBarRendered &&
