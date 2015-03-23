@@ -21,11 +21,22 @@ namespace Tracker
 
         static void Main(string[] args)
         {
+            if (Game.Mode == GameMode.Running)
+            {
+                Game_OnStart(new EventArgs());
+            }
+
+            Game.OnStart += Game_OnStart;
+        }
+
+        static void Game_OnStart(EventArgs args)
+        {
             Config = new Menu("Tracker", "Tracker", true);
             HbTracker.AttachToMenu(Config);
             WardTracker.AttachToMenu(Config);
             Config.AddToMainMenu();
         }
+
     }
 
 }
