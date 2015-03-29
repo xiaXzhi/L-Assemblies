@@ -7,7 +7,7 @@ using SorakaSharp.Source.Handler;
 
 namespace SorakaSharp.Source.Manager.Heal.Ultimate
 {
-    internal class CUltimate
+    internal static class CUltimate
     {
 
         //Source: https://github.com/Hellsing/LeagueSharp/blob/master/Kalista/SoulBoundSaver.cs
@@ -25,14 +25,9 @@ namespace SorakaSharp.Source.Manager.Heal.Ultimate
             get { return _incomingDamage.Sum(e => e.Value) + _instantDamage.Sum(e => e.Value); }
         }
 
-        private static bool IsBlocked
+        private static bool IsBlocked(this Obj_AI_Hero unit)
         {
-            get
-            {
-                return
-                    HeroManager.Allies.Any(
-                        ally => CConfig.ConfigMenu.Item("DontUlt" + ally.BaseSkinName).GetValue<bool>());
-            }
+            return CConfig.ConfigMenu.SubMenu("Ultimate").SubMenu("DontUlt").Items.Any(entry => entry.DisplayName == unit.BaseSkinName && entry.IsActive());
         }
 
         internal static void Initialize()
@@ -50,7 +45,7 @@ namespace SorakaSharp.Source.Manager.Heal.Ultimate
             {
                 //Auto Attack
                 if ((!(sender is Obj_AI_Hero) || args.SData.IsAutoAttack()) && args.Target != null &&
-                    args.Target.NetworkId == ally.NetworkId && !IsBlocked)
+                    args.Target.NetworkId == ally.NetworkId && !ally.IsBlocked())
                 {
                     // Calculate arrival time and damage
                     _incomingDamage.Add(
@@ -67,7 +62,7 @@ namespace SorakaSharp.Source.Manager.Heal.Ultimate
                     if (slot != SpellSlot.Unknown)
                     {
                         if (slot == attacker.GetSpellSlot("SummonerDot") && args.Target != null &&
-                            args.Target.NetworkId == ally.NetworkId && !IsBlocked)
+                            args.Target.NetworkId == ally.NetworkId && !ally.IsBlocked())
                         {
                             // Ingite damage (dangerous)
                             _instantDamage.Add(Game.Time + 2,
@@ -117,7 +112,7 @@ namespace SorakaSharp.Source.Manager.Heal.Ultimate
         {
             get
             {
-                return HeroManager.Allies.Where(allies => allies.IsValidTarget()).Select(allies => allies.Health / allies.MaxHealth * 100).FirstOrDefault();
+                return HeroManager.Allies.Where(allies => allies.IsValidTarget()).Select(allies => allies.HealthPercentage()).FirstOrDefault();
             }
         }
 

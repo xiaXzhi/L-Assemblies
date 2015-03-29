@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SorakaSharp.Source.Handler;
@@ -12,31 +13,22 @@ namespace SorakaSharp.Source.Manager.Heal
             get { return CSpell.W; }
         }
 
-        private static int GetPriority()
+        private static bool IsBlocked(this Obj_AI_Hero unit)
+        {
+            return CConfig.ConfigMenu.SubMenu("Heal").SubMenu("DontHeal").Items.Any(entry => entry.DisplayName == unit.BaseSkinName && entry.IsActive());
+        }
+
+        //TODO: Check if HealthTarget is in W range
+        private static Obj_AI_Hero GetHealTarget()
         {
             switch (CConfig.ConfigMenu.Item("priority").GetValue<StringList>().SelectedIndex)
             {
-                case 0: // Most AD
-                    return 1;
-                case 1: // Most AP
-                    return 2;
-                case 2: // Lowest HP
-                    return 3;
-            }
-            return 0;
-        }
-
-        private static Obj_AI_Hero GetHealTarget() //TODO: Take care of "Don't Heal XXX", 
-        {
-            foreach (var ally in HeroManager.Allies.Where(ally => ally.IsValidTarget(W.Range)))
-            {
-                switch (GetPriority())
-                {
-                    case 1: //return MostAD
-                    case 2: //return MostAP
-                    case 3: //return LowestHP
-                        break;
-                }
+                case 0:
+                    return HeroManager.Allies.MaxOrDefault(hero => hero.TotalAttackDamage); //return MostAD
+                case 1:
+                    return HeroManager.Allies.MaxOrDefault(hero => hero.TotalMagicalDamage); //return MostAP
+                case 2:
+                    return HeroManager.Allies.MinOrDefault(hero => hero.Health); //return MostAP
             }
             return null;
         }
@@ -46,7 +38,8 @@ namespace SorakaSharp.Source.Manager.Heal
             if (!CConfig.ConfigMenu.Item("useHeal").GetValue<bool>() || !W.IsReady())
                 return;
 
-            if (GetHealTarget().HealthPercent <= CConfig.ConfigMenu.Item("percentage").GetValue<Slider>().Value)
+            if (GetHealTarget().HealthPercentage() <= CConfig.ConfigMenu.Item("percentage").GetValue<Slider>().Value &&
+                !GetHealTarget().IsBlocked())
             {
                 W.Cast(GetHealTarget());
             }

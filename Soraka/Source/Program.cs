@@ -7,7 +7,7 @@ using SorakaSharp.Source.Manager.Heal.Ultimate;
 
 namespace SorakaSharp.Source
 {
-    internal class Program
+    internal static class Program
     {
         // Initialize Champion
         internal const string ChampionName = "Soraka";
