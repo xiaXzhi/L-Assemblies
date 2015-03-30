@@ -18,17 +18,26 @@ namespace SorakaSharp.Source.Manager.Heal
             return CConfig.ConfigMenu.SubMenu("Heal").SubMenu("DontHeal").Items.Any(entry => entry.DisplayName == unit.BaseSkinName && entry.IsActive());
         }
 
-        //TODO: Check if HealthTarget is in W range
         private static Obj_AI_Hero GetHealTarget()
         {
             switch (CConfig.ConfigMenu.Item("priority").GetValue<StringList>().SelectedIndex)
             {
-                case 0:
-                    return HeroManager.Allies.MaxOrDefault(hero => hero.TotalAttackDamage); //return MostAD
-                case 1:
-                    return HeroManager.Allies.MaxOrDefault(hero => hero.TotalMagicalDamage); //return MostAP
-                case 2:
-                    return HeroManager.Allies.MinOrDefault(hero => hero.Health); //return MostAP
+                case 0: // MostAD
+                    return
+                        HeroManager.Allies.Where(ally => ally.IsValidTarget(W.Range + 50))
+                            .OrderByDescending(dmg => dmg.TotalAttackDamage())
+                            .First();
+                case 1: // MostAP
+                    return
+                        HeroManager.Allies.Where(ally => ally.IsValidTarget(W.Range + 50))
+                            .OrderByDescending(ap => ap.TotalMagicalDamage())
+                            .First();
+
+                case 2: //L owestHP
+                    return
+                        HeroManager.Allies.Where(ally => ally.IsValidTarget(W.Range + 50))
+                            .OrderBy(health => health.HealthPercentage())
+                            .First();
             }
             return null;
         }
