@@ -88,7 +88,7 @@ namespace SorakaSharp.Source.Manager.Heal.Ultimate
             //Cast Ultimate
             foreach (var ally in HeroManager.Allies)
             {
-                if (ally.HealthPercent < 5 && ally.CountEnemiesInRange(500) <= 2 || IncomingDamage > ally.Health)
+                if (ally.HealthPercentage() < 5 && ally.CountEnemiesInRange(500) <= 2 || IncomingDamage > ally.Health)
                 {
                     R.Cast();
                 }
@@ -112,7 +112,7 @@ namespace SorakaSharp.Source.Manager.Heal.Ultimate
         {
             get
             {
-                return HeroManager.Allies.Where(allies => allies.IsValidTarget(float.MaxValue, false)).Select(allies => allies.HealthPercent).FirstOrDefault();
+                return HeroManager.Allies.Where(allies => allies.IsValidTarget(float.MaxValue, false)).Select(allies => allies.HealthPercentage()).FirstOrDefault();
             }
         }
 

@@ -1,5 +1,4 @@
 ﻿using LeagueSharp.Common;
-using SorakaSharp.Source.Helper;
 
 namespace SorakaSharp.Source.Handler
 {
@@ -31,27 +30,25 @@ namespace SorakaSharp.Source.Handler
             if (!ComboValid)
                 return;
 
-            var target = TargetSelector.GetTarget(Q.IsEnabledReady() ? Q.Range : E.Range,
+            var target = TargetSelector.GetTarget(Q.IsReady() ? Q.Range : E.Range,
                 TargetSelector.DamageType.Magical);
+
+            var useQ = CConfig.ConfigMenu.Item("comboUseQ").GetValue<bool>();
+            var useE = CConfig.ConfigMenu.Item("comboUseE").GetValue<bool>();
 
             if (target != null)
             {
                 //Cast Q
-                if (Q.IsEnabledReady() && Q.CanCast(target))
+                if (useQ && Q.CanCast(target))
                 {
-                    if (target.CountEnemiesInRange(Q.Width) == 1)
-                    {
-                        Q.Cast(target);
-                    }
+                    Q.Cast(target);
+
                 }
 
                 //Cast E
-                if (E.IsEnabledReady() && E.CanCast(target))
+                if (useE && E.CanCast(target))
                 {
-                    if (target.CountEnemiesInRange(E.Width) == 1)
-                    {
-                        E.Cast(target);
-                    }
+                    E.Cast(target);
                 }
             }
         }

@@ -79,7 +79,6 @@
     <Compile Include="Source\Handler\CCombo.cs" />
     <Compile Include="Source\Handler\CConfig.cs" />
     <Compile Include="Source\Handler\CSpell.cs" />
-    <Compile Include="Source\Helper\CHelper.cs" />
     <Compile Include="Source\Manager\Heal\CHeal.cs" />
     <Compile Include="Source\Manager\Heal\Ultimate\CUltimate.cs" />
     <Compile Include="Source\Program.cs" />

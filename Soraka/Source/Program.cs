@@ -22,7 +22,6 @@ namespace SorakaSharp.Source
 
         private static void Game_OnGameLoad(EventArgs args)
         {
-            Game.PrintChat("kapapapapa2");
             // Validate Champion
             if (Player.ChampionName != ChampionName)
                 return;
@@ -59,7 +58,7 @@ namespace SorakaSharp.Source
             CUltimate.SmartSave();
             CUltimate.TeamfightUltimate();
 
-            if (CConfig.ConfigMenu.Item("ComboActive").GetValue<KeyBind>().Active)
+            if (CConfig.ConfigMenu.Item("comboActive").GetValue<KeyBind>().Active)
             {
                 CCombo.Combo();
             }
