@@ -24,18 +24,18 @@ namespace SorakaSharp.Source.Manager.Heal
             {
                 case 0: // MostAD
                     return
-                        HeroManager.Allies.Where(ally => ally.IsValidTarget(W.Range + 50) && !ally.IsMe)
+                        HeroManager.Allies.Where(ally => ally.IsValidTarget(W.Range + 50, false) && !ally.IsMe)
                             .OrderByDescending(dmg => dmg.TotalAttackDamage())
                             .First();
                 case 1: // MostAP
                     return
-                        HeroManager.Allies.Where(ally => ally.IsValidTarget(W.Range + 50) && !ally.IsMe)
+                        HeroManager.Allies.Where(ally => ally.IsValidTarget(W.Range + 50, false) && !ally.IsMe)
                             .OrderByDescending(ap => ap.TotalMagicalDamage())
                             .First();
 
                 case 2: //LowestHP
                     return
-                        HeroManager.Allies.Where(ally => ally.IsValidTarget(W.Range + 50) && !ally.IsMe)
+                        HeroManager.Allies.Where(ally => ally.IsValidTarget(W.Range + 50, false) && !ally.IsMe)
                             .OrderBy(health => health.HealthPercent)
                             .First();
             }
