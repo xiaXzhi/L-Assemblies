@@ -1,4 +1,5 @@
-﻿using LeagueSharp.Common;
+﻿using System.Linq;
+using LeagueSharp.Common;
 
 namespace SorakaSharp.Source.Handler
 {
@@ -43,7 +44,7 @@ namespace SorakaSharp.Source.Handler
                 .AddItem(new MenuItem("percentage", "Ally HP in % for Heal").SetValue(new Slider(60)));
 
             //Ignore Heal on...
-            foreach (var ally in HeroManager.Allies)
+            foreach (var ally in HeroManager.Allies.Where(ally => !ally.IsMe))
             {
                 ConfigMenu.SubMenu("Heal")
                     .SubMenu("DontHeal")

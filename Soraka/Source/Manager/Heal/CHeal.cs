@@ -24,19 +24,19 @@ namespace SorakaSharp.Source.Manager.Heal
             {
                 case 0: // MostAD
                     return
-                        HeroManager.Allies.Where(ally => ally.IsValidTarget(W.Range + 50))
+                        HeroManager.Allies.Where(ally => ally.IsValidTarget(W.Range + 50) && !ally.IsMe)
                             .OrderByDescending(dmg => dmg.TotalAttackDamage())
                             .First();
                 case 1: // MostAP
                     return
-                        HeroManager.Allies.Where(ally => ally.IsValidTarget(W.Range + 50))
+                        HeroManager.Allies.Where(ally => ally.IsValidTarget(W.Range + 50) && !ally.IsMe)
                             .OrderByDescending(ap => ap.TotalMagicalDamage())
                             .First();
 
-                case 2: //L owestHP
+                case 2: //LowestHP
                     return
-                        HeroManager.Allies.Where(ally => ally.IsValidTarget(W.Range + 50))
-                            .OrderBy(health => health.HealthPercentage())
+                        HeroManager.Allies.Where(ally => ally.IsValidTarget(W.Range + 50) && !ally.IsMe)
+                            .OrderBy(health => health.HealthPercent)
                             .First();
             }
             return null;
@@ -47,9 +47,9 @@ namespace SorakaSharp.Source.Manager.Heal
             if (!CConfig.ConfigMenu.Item("useHeal").GetValue<bool>() || !W.IsReady())
                 return;
 
-            if (GetHealTarget().HealthPercentage() <= CConfig.ConfigMenu.Item("percentage").GetValue<Slider>().Value &&
-                !GetHealTarget().IsBlocked())
+            if (GetHealTarget().HealthPercent <= CConfig.ConfigMenu.Item("percentage").GetValue<Slider>().Value && !GetHealTarget().IsBlocked())
             {
+
                 W.Cast(GetHealTarget());
             }
         }

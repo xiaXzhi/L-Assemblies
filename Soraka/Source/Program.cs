@@ -22,6 +22,7 @@ namespace SorakaSharp.Source
 
         private static void Game_OnGameLoad(EventArgs args)
         {
+            Game.PrintChat("kapapapapa2");
             // Validate Champion
             if (Player.ChampionName != ChampionName)
                 return;
