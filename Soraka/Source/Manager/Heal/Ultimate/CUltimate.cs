@@ -112,7 +112,7 @@ namespace SorakaSharp.Source.Manager.Heal.Ultimate
         {
             get
             {
-                return HeroManager.Allies.Where(allies => allies.IsValidTarget()).Select(allies => allies.HealthPercent).FirstOrDefault();
+                return HeroManager.Allies.Where(allies => allies.IsValidTarget(float.MaxValue, false)).Select(allies => allies.HealthPercent).FirstOrDefault();
             }
         }
 
