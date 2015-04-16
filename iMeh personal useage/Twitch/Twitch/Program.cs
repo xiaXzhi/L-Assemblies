@@ -95,7 +95,7 @@ namespace Twitch
                 }
 
                 //Kill large monsters
-                if (_config.Item("Emobs").GetValue<bool>())
+                if (_config.Item("Emobs").GetValue<bool>() && _orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.Combo )
                 {
                     var minions = MinionManager.GetMinions(_e.Range, MinionTypes.All, MinionTeam.NotAlly);
                     foreach (
