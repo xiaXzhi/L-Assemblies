@@ -78,25 +78,24 @@ namespace Twitch
 
         private static void Game_OnUpdate(EventArgs args)
         {
-            //Killsteal with E
-            if (_config.Item("EKillsteal").GetValue<bool>())
+            if (_e.IsReady())
             {
-                if (_e.IsReady())
+                //Killsteal with E
+                if (_config.Item("EKillsteal").GetValue<bool>())
                 {
+
                     foreach (
                         var enemy in
-                            ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(_e.Range) && _e.IsKillable(enemy))
+                            ObjectManager.Get<Obj_AI_Hero>()
+                                .Where(enemy => enemy.IsValidTarget(_e.Range) && _e.IsKillable(enemy))
                         )
                     {
                         _e.Cast();
                     }
                 }
-            }
 
-            //Kill large monsters
-            if (_config.Item("Emobs").GetValue<bool>())
-            {
-                if (_e.IsReady())
+                //Kill large monsters
+                if (_config.Item("Emobs").GetValue<bool>())
                 {
                     var minions = MinionManager.GetMinions(_e.Range, MinionTypes.All, MinionTeam.NotAlly);
                     foreach (
