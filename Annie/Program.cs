@@ -229,7 +229,7 @@ namespace Annie
 
         private static void ChargeStun()
         {
-            if (StunCount == 4 || ObjectManager.Player.IsDead)
+            if (StunCount == 4 || ObjectManager.Player.IsDead || ObjectManager.Player.IsRecalling)
             {
                 return;
             }
