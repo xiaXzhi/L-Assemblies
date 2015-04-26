@@ -3,7 +3,6 @@ using System.Drawing;
 using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
-using LeagueSharp.Common.Data;
 
 namespace Twitch
 {
@@ -15,7 +14,7 @@ namespace Twitch
         private static Spell _w;
         private static Spell _e;
 
-        private static Obj_AI_Hero _player { get { return ObjectManager.Player; } }
+        private static Obj_AI_Hero Player { get { return ObjectManager.Player; } }
 
         private static void Main(string[] args)
         {
@@ -30,7 +29,7 @@ namespace Twitch
         private static void Game_OnGameLoad(EventArgs args)
         {
             //Verify Champion
-            if (_player.ChampionName != "Twitch")
+            if (Player.ChampionName != "Twitch")
                 return;
 
             //Spells
@@ -107,7 +106,7 @@ namespace Twitch
                         _e.Cast();
                     }
                 }
-            }
+            }   
 
             //Combo/Items
             if (_orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
@@ -124,8 +123,8 @@ namespace Twitch
                 }
 
                 //Use Botrk
-                if (target != null && target.Type == _player.Type &&
-                    target.ServerPosition.Distance(_player.ServerPosition) < 450)
+                if (target != null && target.Type == Player.Type &&
+                    target.ServerPosition.Distance(Player.ServerPosition) < 450)
                 {
                     var hasCutGlass = Items.HasItem(3144);
                     var hasBotrk = Items.HasItem(3153);
@@ -133,23 +132,23 @@ namespace Twitch
                     if (hasBotrk || hasCutGlass)
                     {
                         var itemId = hasCutGlass ? 3144 : 3153;
-                        var damage = _player.GetItemDamage(target, Damage.DamageItems.Botrk);
-                        if (hasCutGlass || _player.Health + damage < _player.MaxHealth)
+                        var damage = Player.GetItemDamage(target, Damage.DamageItems.Botrk);
+                        if (hasCutGlass || Player.Health + damage < Player.MaxHealth)
                             Items.UseItem(itemId, target);
                     }
                 }
 
                 //Use Youmus
-                if (target != null && target.Type == _player.Type && Orbwalking.InAutoAttackRange(target))
+                if (target != null && target.Type == Player.Type && Orbwalking.InAutoAttackRange(target))
                 {
                     Items.UseItem(3142);
                 }
             }
 
             //Auto buy blue trinket
-            if (_player.Level >= 6 && _player.InShop() && !(Items.HasItem(3342) || Items.HasItem(3363)))
+            if (Player.Level >= 6 && Player.InShop() && !(Items.HasItem(3342) || Items.HasItem(3363)))
             {
-                _player.BuyItem(ItemId.Scrying_Orb_Trinket);
+                Player.BuyItem(ItemId.Scrying_Orb_Trinket);
             }
         }
     }
