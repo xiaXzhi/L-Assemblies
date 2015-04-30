@@ -52,9 +52,10 @@ namespace Twitch
             _config.SubMenu("Combo").AddItem(new MenuItem("UseWCombo", "Use W").SetValue(true));
 
             //Misc
+            _config.SubMenu("Misc").AddItem(new MenuItem("blueTrinket", "Buy Blue Trinket on Level 6").SetValue(true));
             _config.SubMenu("Misc").AddItem(new MenuItem("EKillsteal", "Killsteal with E").SetValue(true));
             _config.SubMenu("Misc").AddItem(new MenuItem("EDamage", "E damage on healthbar").SetValue(new Circle(true, Color.Green)));
-            _config.SubMenu("Misc").AddItem(new MenuItem("Emobs", "Kill big mobs with E").SetValue(true));
+            _config.SubMenu("Misc").AddItem(new MenuItem("Emobs", "Kill mobs with E").SetValue(new StringList(new [] { "Baron + Dragon + Siege Minion", "Baron + Dragon", "None" })));
 
             //Attach to root
             _config.AddToMainMenu();
@@ -94,16 +95,31 @@ namespace Twitch
                 }
 
                 //Kill large monsters
-                if (_config.Item("Emobs").GetValue<bool>() && _orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.Combo )
+                if (_orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.Combo)
                 {
                     var minions = MinionManager.GetMinions(_e.Range, MinionTypes.All, MinionTeam.NotAlly);
-                    foreach (
-                        var m in
-                            minions.Where(
-                                m => (m.BaseSkinName.Contains("MinionSiege") || m.BaseSkinName.Contains("Dragon") ||
-                                      m.BaseSkinName.Contains("Baron")) && _e.IsKillable(m)))
+                    foreach (var m in minions)
                     {
-                        _e.Cast();
+                        switch (_config.Item("Emobs").GetValue<StringList>().SelectedIndex)
+                        {
+                            case 0:
+                                if ((m.BaseSkinName.Contains("MinionSiege") || m.BaseSkinName.Contains("Dragon") || m.BaseSkinName.Contains("Baron")) && _e.IsKillable(m))
+                                {
+                                    _e.Cast();
+                                }
+                                break;
+
+                            case 1:
+                                if ((m.BaseSkinName.Contains("Dragon") || m.BaseSkinName.Contains("Baron")) && _e.IsKillable(m))
+                                {
+                                    _e.Cast();
+                                }
+                                break;
+
+                            case 2:
+                                return;
+                                break;
+                        }
                     }
                 }
             }   
@@ -146,7 +162,7 @@ namespace Twitch
             }
 
             //Auto buy blue trinket
-            if (Player.Level >= 6 && Player.InShop() && !(Items.HasItem(3342) || Items.HasItem(3363)))
+            if (_config.Item("blueTrinket").GetValue<bool>() && Player.Level >= 6 && Player.InShop() && !(Items.HasItem(3342) || Items.HasItem(3363)))
             {
                 Player.BuyItem(ItemId.Scrying_Orb_Trinket);
             }
