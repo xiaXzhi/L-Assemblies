@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SorakaSharp.Source.Handler;
@@ -11,7 +12,11 @@ namespace SorakaSharp.Source
     {
         // Initialize Champion
         internal const string ChampionName = "Soraka";
-        private static Obj_AI_Hero Player { get { return ObjectManager.Player; } }
+
+        private static Obj_AI_Hero Player
+        {
+            get { return ObjectManager.Player; }
+        }
 
 
         private static void Main(string[] args)
@@ -44,9 +49,11 @@ namespace SorakaSharp.Source
             CSpell.E.Cast(gapcloser.Sender);
         }
 
-        private static void Interrupter2_OnInterruptableTarget(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
+        private static void Interrupter2_OnInterruptableTarget(Obj_AI_Hero sender,
+            Interrupter2.InterruptableTargetEventArgs args)
         {
-            if (!CConfig.ConfigMenu.Item("InterruptSpells").GetValue<bool>() || !CSpell.E.CanCast(sender) || args.DangerLevel != Interrupter2.DangerLevel.High)
+            if (!CConfig.ConfigMenu.Item("InterruptSpells").GetValue<bool>() || !CSpell.E.CanCast(sender) ||
+                args.DangerLevel != Interrupter2.DangerLevel.High)
                 return;
 
             CSpell.E.Cast(sender);
@@ -61,6 +68,21 @@ namespace SorakaSharp.Source
             if (CConfig.ConfigMenu.Item("comboActive").GetValue<KeyBind>().Active)
             {
                 CCombo.Combo();
+            }
+
+            foreach (var enemy in ObjectHandler.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(CSpell.E.Range)))
+            {
+                if (enemy.HasBuffOfType(BuffType.Stun) || enemy.HasBuffOfType(BuffType.Snare) ||
+                    enemy.HasBuffOfType(BuffType.Charm) || enemy.HasBuffOfType(BuffType.Fear) ||
+                    enemy.HasBuffOfType(BuffType.Taunt) || enemy.HasBuffOfType(BuffType.Suppression) ||
+                    enemy.IsStunned || enemy.HasBuff("Recall"))
+                {
+                    CSpell.E.Cast(enemy);
+                }
+                else
+                {
+                    CSpell.E.CastIfHitchanceEquals(enemy, HitChance.Immobile, true);
+                }
             }
         }
     }
