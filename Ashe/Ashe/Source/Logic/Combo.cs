@@ -75,12 +75,11 @@ namespace Ashe.Source.Logic
                     {
                         var waypoints = target.GetWaypoints();
                         if ((Player.Distance(waypoints.Last().To3D()) - Player.Distance(target.Position)) > 400
-                            && (!W.IsReady() && W.IsKillable(target)))
+                            && !CheckOverkill(target))
                         {
                             R.Cast(target);
                         }
-                        else if ((!W.IsKillable(target) || !W.IsReady()) && R.IsKillable(target)
-                                 && Player.Distance(target) < 2500)
+                        else if (!CheckOverkill(target) && Player.Distance(target) < 2500 && R.IsKillable(target))
                         {
                             R.Cast(target);
                         }
@@ -104,7 +103,6 @@ namespace Ashe.Source.Logic
             }
         }
 
-        // Player
         /// <summary>
         /// Gets the player.
         /// </summary>
@@ -116,7 +114,6 @@ namespace Ashe.Source.Logic
             }
         }
 
-        // Spells
         /// <summary>
         /// Gets the q.
         /// </summary>
@@ -139,7 +136,6 @@ namespace Ashe.Source.Logic
             }
         }
 
-        // Slider
         /// <summary>
         /// Gets the stack slider.
         /// </summary>
@@ -151,7 +147,6 @@ namespace Ashe.Source.Logic
             }
         }
 
-        // Booleans
         /// <summary>
         /// Gets a value indicating whether use q.
         /// </summary>
@@ -194,6 +189,29 @@ namespace Ashe.Source.Logic
             {
                 return Ashe.W;
             }
+        }
+
+        /// <summary>
+        /// The check overkill.
+        /// </summary>
+        /// <param name="target">
+        /// The target.
+        /// </param>
+        /// <returns>
+        /// The <see cref="bool"/>.
+        /// </returns>
+        private static bool CheckOverkill(Obj_AI_Hero target)
+        {
+            var totalDamage = Player.GetAutoAttackDamage(target);
+            if (R.IsReady() && R.CanCast(target))
+            {
+                if (W.IsReady() && W.CanCast(target) && target.IsValidTarget(W.Range) && W.IsKillable(target))
+                {
+                    totalDamage += W.GetDamage(target);
+                }
+            }
+
+            return totalDamage > target.Health;
         }
 
         #endregion

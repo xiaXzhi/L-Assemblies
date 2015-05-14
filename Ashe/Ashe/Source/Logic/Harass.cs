@@ -92,7 +92,6 @@ namespace Ashe.Source.Logic
             }
         }
 
-        // Slider
         /// <summary>
         /// Gets the mana slider.
         /// </summary>
@@ -104,7 +103,6 @@ namespace Ashe.Source.Logic
             }
         }
 
-        // Player
         /// <summary>
         /// Gets the player.
         /// </summary>
@@ -116,7 +114,6 @@ namespace Ashe.Source.Logic
             }
         }
 
-        // Booleans
         /// <summary>
         /// Gets a value indicating whether use w.
         /// </summary>
@@ -128,7 +125,6 @@ namespace Ashe.Source.Logic
             }
         }
 
-        // Spells
         /// <summary>
         /// Gets the w.
         /// </summary>

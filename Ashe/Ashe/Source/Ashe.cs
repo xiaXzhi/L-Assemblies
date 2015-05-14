@@ -113,19 +113,16 @@ namespace Ashe.Source
 
         #region Static Fields
 
-        // Menu
         /// <summary>
         /// The menu.
         /// </summary>
         public static Menu Menu;
 
-        // Orbwalker
         /// <summary>
         /// The orbwalker.
         /// </summary>
         public static Orbwalking.Orbwalker Orbwalker;
 
-        // Spells
         /// <summary>
         /// The Q Spell
         /// </summary>
