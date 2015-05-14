@@ -19,7 +19,6 @@
 //   The harass.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
-
 namespace Ashe.Source.Logic
 {
     using System;
@@ -40,6 +39,31 @@ namespace Ashe.Source.Logic
         static Harass()
         {
             Game.OnUpdate += Game_OnUpdate;
+        }
+
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// The game_ on update.
+        /// </summary>
+        /// <param name="args">
+        /// The args.
+        /// </param>
+        private static void Game_OnUpdate(EventArgs args)
+        {
+            if (DoHarass || DoHarassT)
+            {
+                var target = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
+                if (target.IsValidTarget())
+                {
+                    if (UseW && Player.ManaPercent >= ManaSlider)
+                    {
+                        W.Cast(target);
+                    }
+                }
+            }
         }
 
         #endregion
@@ -113,31 +137,6 @@ namespace Ashe.Source.Logic
             get
             {
                 return Ashe.W;
-            }
-        }
-
-        #endregion
-
-        #region Methods
-
-        /// <summary>
-        /// The game_ on update.
-        /// </summary>
-        /// <param name="args">
-        /// The args.
-        /// </param>
-        private static void Game_OnUpdate(EventArgs args)
-        {
-            if (DoHarass || DoHarassT)
-            {
-                var target = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
-                if (target.IsValidTarget())
-                {
-                    if (UseW && Player.ManaPercent >= ManaSlider)
-                    {
-                        W.Cast(target);
-                    }
-                }
             }
         }
 

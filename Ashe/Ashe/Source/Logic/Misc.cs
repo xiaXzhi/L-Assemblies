@@ -19,7 +19,6 @@
 //   The misc.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
-
 namespace Ashe.Source.Logic
 {
     using System;
@@ -40,6 +39,25 @@ namespace Ashe.Source.Logic
         static Misc()
         {
             Game.OnUpdate += Game_OnUpdate;
+        }
+
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// The game_ on update.
+        /// </summary>
+        /// <param name="args">
+        /// The args.
+        /// </param>
+        private static void Game_OnUpdate(EventArgs args)
+        {
+            // Auto buy blue trinket
+            if (BuyTrinket && Player.Level >= 6 && Player.InShop() && !(Items.HasItem(3342) || Items.HasItem(3363)))
+            {
+                Player.BuyItem(ItemId.Scrying_Orb_Trinket);
+            }
         }
 
         #endregion
@@ -67,25 +85,6 @@ namespace Ashe.Source.Logic
             get
             {
                 return Ashe.Player;
-            }
-        }
-
-        #endregion
-
-        #region Methods
-
-        /// <summary>
-        /// The game_ on update.
-        /// </summary>
-        /// <param name="args">
-        /// The args.
-        /// </param>
-        private static void Game_OnUpdate(EventArgs args)
-        {
-            // Auto buy blue trinket
-            if (BuyTrinket && Player.Level >= 6 && Player.InShop() && !(Items.HasItem(3342) || Items.HasItem(3363)))
-            {
-                Player.BuyItem(ItemId.Scrying_Orb_Trinket);
             }
         }
 

@@ -19,7 +19,6 @@
 //   The combo.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
-
 namespace Ashe.Source.Logic
 {
     using System;
@@ -41,6 +40,53 @@ namespace Ashe.Source.Logic
         static Combo()
         {
             Game.OnUpdate += Game_OnUpdate;
+        }
+
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// The game_ on update.
+        /// </summary>
+        /// <param name="args">
+        /// The args.
+        /// </param>
+        private static void Game_OnUpdate(EventArgs args)
+        {
+            if (DoCombo)
+            {
+                var target = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
+                if (target.IsValidTarget())
+                {
+                    if (UseQ
+                        && (Player.GetBuffCount("AsheQ") >= StackSlider
+                            || Player.GetBuffCount("AsheQReady") >= StackSlider))
+                    {
+                        Q.Cast();
+                    }
+
+                    if (UseW)
+                    {
+                        W.Cast(target);
+                    }
+
+                    if (UseR)
+                    {
+                        var waypoints = target.GetWaypoints();
+                        if ((Player.Distance(waypoints.Last().To3D()) - Player.Distance(target.Position)) > 400
+                            && (!W.IsReady() && W.IsKillable(target)))
+                        {
+                            R.Cast(target);
+                        }
+                        else if ((!W.IsKillable(target) || !W.IsReady()) && R.IsKillable(target)
+                                 && Player.Distance(target) < 2500)
+                        {
+                            R.Cast(target);
+                        }
+                    }
+                }
+            }
         }
 
         #endregion
@@ -147,51 +193,6 @@ namespace Ashe.Source.Logic
             get
             {
                 return Ashe.W;
-            }
-        }
-
-        #endregion
-
-        #region Methods
-
-        /// <summary>
-        /// The game_ on update.
-        /// </summary>
-        /// <param name="args">
-        /// The args.
-        /// </param>
-        private static void Game_OnUpdate(EventArgs args)
-        {
-            if (DoCombo)
-            {
-                var target = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
-                if (target.IsValidTarget())
-                {
-                    if (UseQ && StackSlider >= Player.GetBuffCount("ashebuff"))
-                    {
-                        Q.Cast();
-                    }
-
-                    if (UseW)
-                    {
-                        W.Cast();
-                    }
-
-                    if (UseR)
-                    {
-                        var waypoints = target.GetWaypoints();
-                        if ((Player.Distance(waypoints.Last().To3D()) - Player.Distance(target.Position)) > 400
-                            && (!W.IsReady() && W.IsKillable(target)))
-                        {
-                            R.Cast(target);
-                        }
-                        else if ((!W.IsKillable(target) || !W.IsReady()) && R.IsKillable(target)
-                                 && Player.Distance(target) < 2500)
-                        {
-                            R.Cast();
-                        }
-                    }
-                }
             }
         }
 
