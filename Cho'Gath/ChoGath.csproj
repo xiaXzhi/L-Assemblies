@@ -7,7 +7,7 @@
     <ProjectGuid>{DF8658DB-3A48-4A51-A809-E52AB92F6360}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Cho_Gath</RootNamespace>
+    <RootNamespace>ChoGath</RootNamespace>
     <AssemblyName>Cho%27Gath</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -53,16 +53,16 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="LeagueSharp">
-      <HintPath>C:\Users\Andre\Google Drive\lsharp\System\LeagueSharp.dll</HintPath>
+      <HintPath>..\..\..\..\Desktop\LeagueSharp\System\LeagueSharp.dll</HintPath>
     </Reference>
     <Reference Include="LeagueSharp.Common">
-      <HintPath>C:\Users\Andre\Google Drive\lsharp\System\LeagueSharp.Common.dll</HintPath>
+      <HintPath>..\..\..\..\Desktop\LeagueSharp\System\LeagueSharp.Common.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX">
-      <HintPath>C:\Users\Andre\Google Drive\lsharp\System\SharpDX.dll</HintPath>
+      <HintPath>..\..\..\..\Desktop\LeagueSharp\System\SharpDX.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX.Direct3D9">
-      <HintPath>C:\Users\Andre\Google Drive\lsharp\System\SharpDX.Direct3D9.dll</HintPath>
+      <HintPath>..\..\..\..\Desktop\LeagueSharp\System\SharpDX.Direct3D9.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

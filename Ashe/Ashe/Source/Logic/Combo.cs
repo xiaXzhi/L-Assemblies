@@ -61,7 +61,7 @@ namespace Ashe.Source.Logic
                 {
                     if (UseQ
                         && (Player.GetBuffCount("AsheQ") >= StackSlider
-                            || Player.GetBuffCount("AsheQReady") >= StackSlider))
+                            || Player.GetBuffCount("AsheQReady") >= StackSlider) && Orbwalking.InAutoAttackRange(target))
                     {
                         Q.Cast();
                     }

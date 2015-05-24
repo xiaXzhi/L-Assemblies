@@ -5,7 +5,7 @@ using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 
-namespace Cho_Gath
+namespace ChoGath
 {
     internal class Program
     {
