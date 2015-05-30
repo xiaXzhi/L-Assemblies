@@ -22,6 +22,7 @@ namespace Evelynn
         //Spells
         public static List<Spell> SpellList = new List<Spell>();
 
+
         public static Spell Q;
         public static Spell W;
         public static Spell E;
@@ -112,6 +113,10 @@ namespace Evelynn
         {
             foreach (var spell in SpellList)
             {
+                if (spell.Slot == SpellSlot.W)
+                {
+                    return;
+                }
                 var menuItem = Config.Item(spell.Slot + "Range").GetValue<Circle>();
                 if (menuItem.Active)
                     Render.Circle.DrawCircle(ObjectManager.Player.Position, spell.Range, menuItem.Color);
@@ -143,7 +148,7 @@ namespace Evelynn
                 .Count(
                     hero =>
                         hero.IsValidTarget() &&
-                        hero.Distance(new Vector2(args.EndPosition.X, args.EndPosition.Y)) <= R.Range) == 0)
+                        hero.Distance(args.StartPosition.To2D()) <= R.Range) == 0)
                     args.Process = false;
             }
         }
