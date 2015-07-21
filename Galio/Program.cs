@@ -15,6 +15,9 @@
 //   You should have received a copy of the GNU General Public License
 //   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // </copyright>
+// <summary>
+//   The program.
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 namespace GalioSharp
 {
@@ -192,7 +195,33 @@ namespace GalioSharp
 
             Interrupter2.OnInterruptableTarget += Interrupter2_OnInterruptableTarget;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
+            Obj_AI_Base.OnAggro += Obj_AI_Turret_OnAggro;
             Game.OnUpdate += Game_OnUpdate;
+        }
+
+        /// <summary>
+        /// The ObjAITurret event.
+        /// </summary>
+        /// <param name="sender">
+        /// The sender.
+        /// </param>
+        /// <param name="args">
+        /// The args.
+        /// </param>
+        private static void Obj_AI_Turret_OnAggro(Obj_AI_Base sender, GameObjectAggroEventArgs args)
+        {
+            if (!w.IsReady())
+            {
+                return;
+            }
+
+            foreach (
+                var hero in
+                    HeroManager.Allies.Where(
+                        hero => args.NetworkId == hero.NetworkId && player.Distance(hero, true) < w.RangeSqr))
+            {
+                w.Cast(hero);
+            }
         }
 
         /// <summary>
@@ -462,6 +491,9 @@ namespace GalioSharp
             return result;
         }
 
+        /// <summary>
+        /// The auto w.
+        /// </summary>
         private static void AutoW()
         {
             // Check spell arrival
@@ -473,12 +505,11 @@ namespace GalioSharp
 
             if (w.IsReady())
             {
-                foreach (
-                    var hero in
-                        HeroManager.Allies.Where(
-                            hero =>
-                            hero.Distance(player) < w.Range
-                            && (IncomingDamageSum > 100 || IncomingDamageSum > hero.Health)))
+                foreach (var hero in
+                    HeroManager.Allies.Where(
+                        hero =>
+                        hero.Distance(player) < w.Range && (IncomingDamageSum > 100 || IncomingDamageSum > hero.Health))
+                    )
                 {
                     w.Cast(hero);
                 }
@@ -568,7 +599,6 @@ namespace GalioSharp
                 w.Cast(player);
             }
 
-
             if (sender.IsEnemy)
             {
                 foreach (var hero in HeroManager.Allies)
@@ -576,7 +606,7 @@ namespace GalioSharp
                     if (sender is Obj_AI_Hero && args.SData.IsAutoAttack() && args.Target == hero)
                     {
                         IncomingDamage.Add(
-                            hero.ServerPosition.Distance(sender.ServerPosition) / args.SData.MissileSpeed + Game.Time,
+                            hero.ServerPosition.Distance(sender.ServerPosition) / args.SData.MissileSpeed + Game.Time, 
                             (float)sender.GetAutoAttackDamage(hero));
                     }
 
@@ -587,7 +617,7 @@ namespace GalioSharp
 
                         if (slot != SpellSlot.Unknown)
                         {
-                            if (slot.HasFlag((SpellSlot.Q | SpellSlot.W | SpellSlot.E | SpellSlot.R)))
+                            if (slot.HasFlag(SpellSlot.Q | SpellSlot.W | SpellSlot.E | SpellSlot.R))
                             {
                                 IncomingDamage.Add(Game.Time + 2, (float)attacker.GetSpellDamage(hero, slot));
                             }
