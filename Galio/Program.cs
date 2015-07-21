@@ -128,12 +128,12 @@ namespace GalioSharp
                 return;
             }
 
-            q = new Spell(SpellSlot.Q, 940f);
-            q.SetSkillshot(0.50f, 120f, 1300f, false, SkillshotType.SkillshotCircle);
+            q = new Spell(SpellSlot.Q, 900f);
+            q.SetSkillshot(0.25f, 200f, 1300f, false, SkillshotType.SkillshotCircle);
             w = new Spell(SpellSlot.W, 800f);
-            w.SetTargetted(0.50f, 20f);
-            e = new Spell(SpellSlot.E, 1180f);
-            e.SetSkillshot(0.50f, 120f, 1200f, false, SkillshotType.SkillshotLine);
+            w.SetTargetted(0.25f, 20f);
+            e = new Spell(SpellSlot.E, 1200f);
+            e.SetSkillshot(0.25f, 120f, 1200f, false, SkillshotType.SkillshotLine);
             r = new Spell(SpellSlot.R, 600f);
 
             igniteSlot = player.GetSpellSlot("SummonerDot");
