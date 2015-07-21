@@ -43,11 +43,6 @@ namespace GalioSharp
         private static readonly Dictionary<float, float> IncomingDamage = new Dictionary<float, float>();
 
         /// <summary>
-        ///     The instant damage dictionary.
-        /// </summary>
-        private static readonly Dictionary<float, float> InstantDamage = new Dictionary<float, float>();
-
-        /// <summary>
         ///     The player.
         /// </summary>
         private static Obj_AI_Hero player;
@@ -99,7 +94,7 @@ namespace GalioSharp
         {
             get
             {
-                return IncomingDamage.Sum(e => e.Value) + InstantDamage.Sum(e => e.Value);
+                return IncomingDamage.Sum(e => e.Value);
             }
         }
 
@@ -161,7 +156,6 @@ namespace GalioSharp
                     new MenuItem("UseRNAuto", "Min Targets").SetValue(
                         new StringList(new[] { "2 target", "3 target", "4 target", "5 target" })));
             config.SubMenu("Ultimate").AddItem(new MenuItem("FlashUlt", "Flash Ult").SetValue(true));
-            config.SubMenu("Ultimate").AddItem(new MenuItem("UltCircle", "Draw Ult Circle").SetValue(true));
 
             config.SubMenu("Harass").AddItem(new MenuItem("UseQHarass", "Use Q").SetValue(true));
             config.SubMenu("Harass").AddItem(new MenuItem("UseEHarass", "Use E").SetValue(true));
@@ -285,7 +279,8 @@ namespace GalioSharp
 
             if (Utility.CountEnemiesInRange(r.Range) <= 1)
             {
-                if (useR && GetComboDamage(target) > target.Health && r.IsReady())
+                if (useR && GetComboDamage(target) > target.Health && r.IsReady()
+                    && (!q.IsReady() && q.IsKillable(target)) || (e.IsReady() && e.IsKillable(target)))
                 {
                     r.Cast();
                 }
@@ -361,7 +356,7 @@ namespace GalioSharp
             {
                 if (config.SubMenu("Harass").Item("UseQHarass").GetValue<bool>() && q.IsReady())
                 {
-                    q.Cast(target);
+                    q.CastIfHitchanceEquals(target, HitChance.High);
                     return;
                 }
 
@@ -467,11 +462,6 @@ namespace GalioSharp
             return result;
         }
 
-        #region AutoW
-
-        /// <summary>
-        ///     The auto w function.
-        /// </summary>
         private static void AutoW()
         {
             // Check spell arrival
@@ -481,20 +471,16 @@ namespace GalioSharp
                 IncomingDamage.Remove(item.Key);
             }
 
-            // Instant damage removal
-            itemsToRemove = InstantDamage.Where(entry => entry.Key < Game.Time).ToArray();
-            foreach (var item in itemsToRemove)
-            {
-                InstantDamage.Remove(item.Key);
-            }
-
             if (w.IsReady())
             {
-                foreach (var ally in
-                    HeroManager.Allies.Where(
-                        ally => ally.Distance(player, true) < w.RangeSqr && IncomingDamageSum > 100))
+                foreach (
+                    var hero in
+                        HeroManager.Allies.Where(
+                            hero =>
+                            hero.Distance(player) < w.Range
+                            && (IncomingDamageSum > 100 || IncomingDamageSum > hero.Health)))
                 {
-                    w.Cast(ally);
+                    w.Cast(hero);
                 }
             }
         }
@@ -543,7 +529,7 @@ namespace GalioSharp
                     {
                         var circle = MEC.GetMec(subGroup);
 
-                        if (r.IsReady() && flashSlot.IsReady() && circle.Center.Distance(player, true) <= 180625
+                        if (r.IsReady() && flashSlot.IsReady() && circle.Center.Distance(player) <= 425
                             && circle.Radius <= r.Range)
                         {
                             player.Spellbook.CastSpell(flashSlot, circle.Center.To3D());
@@ -572,51 +558,43 @@ namespace GalioSharp
         /// </param>
         private static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-            if (!config.SubMenu("Misc").Item("AutoW").GetValue<bool>() || !w.IsReady() || !sender.IsEnemy)
+            if (!config.SubMenu("Misc").Item("AutoW").GetValue<bool>() || !w.IsReady())
             {
                 return;
             }
 
-            foreach (var ally in HeroManager.Allies.Where(ally => ally.Distance(player, true) < w.RangeSqr))
+            if (sender.IsMe && args.SData.Name == "GalioIdolOfDurand")
             {
-                if ((!(sender is Obj_AI_Hero) || args.SData.IsAutoAttack()) && args.Target != null
-                    && (args.Target.NetworkId == ally.NetworkId || args.Target.NetworkId == player.NetworkId))
+                w.Cast(player);
+            }
+
+
+            if (sender.IsEnemy)
+            {
+                foreach (var hero in HeroManager.Allies)
                 {
-                    IncomingDamage.Add(
-                        ally.ServerPosition.Distance(sender.ServerPosition) / args.SData.MissileSpeed + Game.Time, 
-                        (float)sender.GetAutoAttackDamage(ally));
-                }
-                else
-                {
-                    var hero = sender as Obj_AI_Hero;
-                    if (hero != null)
+                    if (sender is Obj_AI_Hero && args.SData.IsAutoAttack() && args.Target == hero)
                     {
-                        var attacker = hero;
+                        IncomingDamage.Add(
+                            hero.ServerPosition.Distance(sender.ServerPosition) / args.SData.MissileSpeed + Game.Time,
+                            (float)sender.GetAutoAttackDamage(hero));
+                    }
+
+                    if (sender is Obj_AI_Hero && args.Target == hero)
+                    {
+                        var attacker = sender as Obj_AI_Hero;
                         var slot = attacker.GetSpellSlot(args.SData.Name);
 
                         if (slot != SpellSlot.Unknown)
                         {
-                            if (slot == attacker.GetSpellSlot("SummonerDot") && args.Target != null
-                                && (args.Target.NetworkId == ally.NetworkId || args.Target.NetworkId == player.NetworkId))
+                            if (slot.HasFlag((SpellSlot.Q | SpellSlot.W | SpellSlot.E | SpellSlot.R)))
                             {
-                                InstantDamage.Add(
-                                    Game.Time + 2, 
-                                    (float)attacker.GetSummonerSpellDamage(ally, Damage.SummonerSpell.Ignite));
-                            }
-                            else if (slot.HasFlag(SpellSlot.Q | SpellSlot.W | SpellSlot.E | SpellSlot.R)
-                                     && ((args.Target != null
-                                          && (args.Target.NetworkId == ally.NetworkId
-                                              || args.Target.NetworkId == player.NetworkId))
-                                         || args.End.Distance(ally.ServerPosition) < Math.Pow(args.SData.LineWidth, 2)))
-                            {
-                                InstantDamage.Add(Game.Time + 2, (float)attacker.GetSpellDamage(ally, slot));
+                                IncomingDamage.Add(Game.Time + 2, (float)attacker.GetSpellDamage(hero, slot));
                             }
                         }
                     }
                 }
             }
         }
-
-        #endregion
     }
 }
