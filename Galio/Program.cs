@@ -554,7 +554,7 @@ namespace GalioSharp
             }
             else
             {
-                if (player.CountEnemiesInRange(r.RangeSqr) >= minTargets && r.IsReady())
+                if (player.CountEnemiesInRange(r.Range) >= minTargets && r.IsReady())
                 {
                     r.Cast();
                 }
