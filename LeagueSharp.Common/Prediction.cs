@@ -424,6 +424,8 @@ namespace LeagueSharp.Common
 
             var result = GetPositionOnPath(input, input.Unit.GetWaypoints(), speed);
 
+            // Fill with bro science
+
             if (result.Hitchance >= HitChance.Medium && input.Unit is Obj_AI_Hero)
             {
                 if (input.Unit.HasBuffOfType(BuffType.Slow) || input.Unit.Distance(input.From) < 300)
