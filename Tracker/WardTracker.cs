@@ -7,6 +7,7 @@ using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
+using Tracker.Properties;
 using Color = System.Drawing.Color;
 
 #endregion
@@ -17,7 +18,7 @@ namespace Tracker
     {
         Green,
         Pink,
-        Trap,
+        Trap
     }
 
     internal class WardData
@@ -35,11 +36,11 @@ namespace Tracker
                 switch (Type)
                 {
                     case WardType.Green:
-                        return Properties.Resources.Minimap_Ward_Green_Enemy;
+                        return Resources.Minimap_Ward_Green_Enemy;
                     case WardType.Pink:
-                        return Properties.Resources.Minimap_Ward_Pink_Enemy;
+                        return Resources.Minimap_Ward_Pink_Enemy;
                     default:
-                        return Properties.Resources.Minimap_Ward_Green_Enemy;
+                        return Resources.Minimap_Ward_Green_Enemy;
                 }
             }
         }
@@ -63,13 +64,13 @@ namespace Tracker
 
     internal class DetectedWard
     {
+        private readonly float _scale = 0.7f;
         private Render.Circle _defaultCircle;
         private Render.Circle _defaultCircleFilled;
         private Render.Sprite _minimapSprite;
         private Render.Line _missileLine;
         private Render.Circle _rangeCircle;
         private Render.Circle _rangeCircleFilled;
-        private float _scale = 0.7f;
         private Render.Text _timerText;
 
         public DetectedWard(WardData data,
@@ -227,7 +228,7 @@ namespace Tracker
     }
 
     /// <summary>
-    /// Ward tracker tracks enemy wards and traps.
+    ///     Ward tracker tracks enemy wards and traps.
     /// </summary>
     public static class WardTracker
     {

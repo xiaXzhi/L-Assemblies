@@ -31,7 +31,7 @@ namespace Tracker
         public static Font Text;
         public static int X;
         public static int Y;
-        public static SpellSlot[] SummonerSpellSlots = { ((SpellSlot) 4), ((SpellSlot) 5) };
+        public static SpellSlot[] SummonerSpellSlots = { SpellSlot.Summoner1, SpellSlot.Summoner2 };
         public static SpellSlot[] SpellSlots = { SpellSlot.Q, SpellSlot.W, SpellSlot.E, SpellSlot.R };
         public static Menu Config;
 
@@ -85,7 +85,6 @@ namespace Tracker
             Config = menu.AddSubMenu(new Menu("CD Tracker", "CD Tracker"));
             Config.AddItem(new MenuItem("TrackAllies", "Track allies").SetValue(true));
             Config.AddItem(new MenuItem("TrackEnemies", "Track enemies").SetValue(true));
-            Config.AddItem(new MenuItem("TrackMe", "Track me").SetValue(false));
         }
 
         private static Texture GetSummonerTexture(string name)
@@ -213,11 +212,10 @@ namespace Tracker
 
                 foreach (var hero in
                     HeroManager.AllHeroes.Where(
-                            hero =>
-                                hero != null && hero.IsValid && (!hero.IsMe || Config.Item("TrackMe").GetValue<bool>()) &&
-                                hero.IsHPBarRendered &&
-                                (hero.IsEnemy && Config.Item("TrackEnemies").GetValue<bool>() ||
-                                 hero.IsAlly && Config.Item("TrackAllies").GetValue<bool>())))
+                        hero =>
+                            hero != null && hero.IsValid && !hero.IsMe && hero.IsHPBarRendered &&
+                            (hero.IsEnemy && Config.Item("TrackEnemies").GetValue<bool>() ||
+                             hero.IsAlly && Config.Item("TrackAllies").GetValue<bool>())))
                 {
                     Sprite.Begin();
 
@@ -278,7 +276,7 @@ namespace Tracker
                         var darkColor = (t > 0) ? new ColorBGRA(168, 98, 0, 255) : new ColorBGRA(0, 130, 15, 255);
                         var lightColor = (t > 0) ? new ColorBGRA(235, 137, 0, 255) : new ColorBGRA(0, 168, 25, 255);
 
-                        if (hero.Spellbook.CanUseSpell(slot) != SpellState.NotLearned)
+                        if (hero.Spellbook.CanUseSpell(slot) != (SpellState) 12)
                         {
                             for (var i = 0; i < 2; i++)
                             {
