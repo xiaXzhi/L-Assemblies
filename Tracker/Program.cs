@@ -23,8 +23,6 @@ namespace Tracker
             HbTracker.AttachToMenu(Config);
             WardTracker.AttachToMenu(Config);
             Config.AddToMainMenu();
-
-            Game.PrintChat("Please use Mayomies Utility+ for updates! :^ )");
         }
     }
 }
