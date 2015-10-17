@@ -13,6 +13,7 @@ namespace Twitch
 
         private static Spell _w;
         private static Spell _e;
+        private static bool CanCastE;
 
         private static Obj_AI_Hero Player { get { return ObjectManager.Player; } }
 
@@ -66,6 +67,24 @@ namespace Twitch
             //Listen to events
             Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
+            GameObject.OnCreate += GameObject_OnCreate;
+            GameObject.OnDelete += GameObject_OnDelete;
+        }
+
+        private static void GameObject_OnDelete(GameObject sender, EventArgs args)
+        {
+            if ((sender.Name.ToLower().Contains("twitch_poison_counter_06.troy")))
+            {
+                CanCastE = false;
+            }
+        }
+
+        private static void GameObject_OnCreate(GameObject sender, EventArgs args)
+        {
+            if ((sender.Name.ToLower().Contains("twitch_poison_counter_06.troy")))
+            {
+                CanCastE = true;
+            }
         }
 
         private static void Drawing_OnDraw(EventArgs args)
@@ -80,10 +99,15 @@ namespace Twitch
         {
             if (_e.IsReady())
             {
+
+                if (CanCastE && _e.IsReady())
+                {
+                    _e.Cast();
+                }
+
                 //Killsteal with E
                 if (_config.Item("EKillsteal").GetValue<bool>())
                 {
-
                     foreach (
                         var enemy in
                             ObjectManager.Get<Obj_AI_Hero>()
