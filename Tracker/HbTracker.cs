@@ -7,9 +7,8 @@ using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
-using SharpDX.Direct3D9;
 using Tracker.Properties;
-using Font = SharpDX.Direct3D9.Font;
+using Color = SharpDX.Color;
 using Rectangle = SharpDX.Rectangle;
 
 #endregion
@@ -21,14 +20,13 @@ namespace Tracker
     /// </summary>
     public static class HbTracker
     {
-        public static Sprite Sprite;
-        public static Texture CdFrameTexture;
+        public static Render.Sprite CdFrame;
 
-        private static readonly Dictionary<string, Texture> SummonerTextures =
-            new Dictionary<string, Texture>(StringComparer.InvariantCultureIgnoreCase);
+        private static readonly Dictionary<string, Render.Sprite> SummonerTextures =
+            new Dictionary<string, Render.Sprite>(StringComparer.InvariantCultureIgnoreCase);
 
-        public static Line ReadyLine;
-        public static Font Text;
+        public static Render.Line ReadyLine;
+        public static Render.Text Text;
         public static int X;
         public static int Y;
         public static SpellSlot[] SummonerSpellSlots = { SpellSlot.Summoner1, SpellSlot.Summoner2 };
@@ -51,33 +49,16 @@ namespace Tracker
                     SummonerTextures.Add(sName, GetSummonerTexture(sName));
                 }
 
-                Sprite = new Sprite(Drawing.Direct3DDevice);
-                CdFrameTexture = Texture.FromMemory(
-                    Drawing.Direct3DDevice, (byte[]) new ImageConverter().ConvertTo(Resources.hud, typeof(byte[])), 147,
-                    27, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
-
-                ReadyLine = new Line(Drawing.Direct3DDevice) { Width = 2 };
-
-                Text = new Font(
-                    Drawing.Direct3DDevice,
-                    new FontDescription
-                    {
-                        FaceName = "Calibri",
-                        Height = 13,
-                        OutputPrecision = FontPrecision.Default,
-                        Quality = FontQuality.Default
-                    });
+                CdFrame = new Render.Sprite(Resources.hud, Vector2.Zero);
+                ReadyLine = new Render.Line(Vector2.Zero, Vector2.Zero, 2, Color.Black);
+                Text = new Render.Text("", Vector2.Zero, 13, Color.Black);
             }
             catch (Exception e)
             {
                 Console.WriteLine(@"/ff can't load the textures: " + e);
             }
 
-            Drawing.OnPreReset += DrawingOnOnPreReset;
-            Drawing.OnPostReset += DrawingOnOnPostReset;
             Drawing.OnDraw += Drawing_OnEndScene;
-            AppDomain.CurrentDomain.DomainUnload += CurrentDomainOnDomainUnload;
-            AppDomain.CurrentDomain.ProcessExit += CurrentDomainOnDomainUnload;
         }
 
         public static void AttachToMenu(Menu menu)
@@ -87,7 +68,7 @@ namespace Tracker
             Config.AddItem(new MenuItem("TrackEnemies", "Track enemies").SetValue(true));
         }
 
-        private static Texture GetSummonerTexture(string name)
+        private static Render.Sprite GetSummonerTexture(string name)
         {
             Bitmap bitmap;
             switch (name)
@@ -145,71 +126,13 @@ namespace Tracker
                     break;
             }
 
-            return Texture.FromMemory(
-                Drawing.Direct3DDevice, (byte[]) new ImageConverter().ConvertTo(bitmap, typeof(byte[])), 12, 240, 0,
-                Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
-        }
-
-        private static void CurrentDomainOnDomainUnload(object sender, EventArgs eventArgs)
-        {
-            ReadyLine.Dispose();
-            Text.Dispose();
-            Sprite.Dispose();
-        }
-
-        private static void DrawingOnOnPostReset(EventArgs args)
-        {
-            ReadyLine.OnResetDevice();
-            Text.OnResetDevice();
-            Sprite.OnResetDevice();
-        }
-
-        private static void DrawingOnOnPreReset(EventArgs args)
-        {
-            ReadyLine.OnLostDevice();
-            Text.OnLostDevice();
-            Sprite.OnLostDevice();
-        }
-
-        private static void Game_OnWndProc(WndEventArgs args)
-        {
-            if (args.Msg != (uint) WindowsMessages.WM_KEYDOWN)
-            {
-                return;
-            }
-
-            var key = args.WParam;
-            switch (key)
-            {
-                case 97: //97 left
-                    X--;
-                    break;
-                case 101: //101 up
-                    Y--;
-                    break;
-                case 99: //99 right
-                    X++;
-                    break;
-                case 98: //98 down
-                    Y++;
-                    break;
-            }
+            return new Render.Sprite(bitmap, Vector2.Zero);
         }
 
         private static void Drawing_OnEndScene(EventArgs args)
         {
-            if (Drawing.Direct3DDevice == null || Drawing.Direct3DDevice.IsDisposed)
-            {
-                return;
-            }
-
             try
             {
-                if (Sprite.IsDisposed)
-                {
-                    return;
-                }
-
                 foreach (var hero in
                     HeroManager.AllHeroes.Where(
                         hero =>
@@ -217,8 +140,6 @@ namespace Tracker
                             (hero.IsEnemy && Config.Item("TrackEnemies").GetValue<bool>() ||
                              hero.IsAlly && Config.Item("TrackAllies").GetValue<bool>())))
                 {
-                    Sprite.Begin();
-
                     var indicator = new HpBarIndicator { Unit = hero };
 
                     X = (int) indicator.Position.X;
@@ -241,23 +162,27 @@ namespace Tracker
                         var s = t > 60 ? string.Format("{0}:{1:D2}", ts.Minutes, ts.Seconds) : String.Format("{0:0}", t);
                         if (t > 0)
                         {
-                            Text.DrawText(
-                                null, s, X - 5 - s.Length * 5, Y + 1 + 13 * k, new ColorBGRA(255, 255, 255, 255));
+                            Text.text = s;
+                            Text.X = X - 5 - s.Length * 5;
+                            Text.Y = Y + 1 + 13 * k;
+                            Text.Color = new ColorBGRA(255, 255, 255, 255);
+                            Text.OnEndScene();
                         }
 
-                        Sprite.Draw(
-                            texture, new ColorBGRA(255, 255, 255, 255), new Rectangle(0, 12 * n, 12, 12),
-                            new Vector3(-X - 3, -Y - 1 - 13 * k, 0));
+                        texture.X = X + 3;
+                        texture.Y = Y + 1 + 13 * k;
+                        texture.Crop(new Rectangle(0, 12 * n, 12, 12));
+                        texture.OnEndScene();
                         k++;
                     }
 
-                    Sprite.Draw(CdFrameTexture, new ColorBGRA(255, 255, 255, 255), null, new Vector3(-X, -Y, 0));
-                    Sprite.End();
+                    CdFrame.X = X;
+                    CdFrame.Y = Y;
+                    CdFrame.OnEndScene();
 
                     var startX = X + 19;
                     var startY = Y + 20;
 
-                    ReadyLine.Begin();
                     foreach (var slot in SpellSlots)
                     {
                         var spell = hero.Spellbook.GetSpell(slot);
@@ -269,8 +194,11 @@ namespace Tracker
                         if (t > 0 && t < 100)
                         {
                             var s = string.Format(t < 1f ? "{0:0.0}" : "{0:0}", t);
-                            Text.DrawText(
-                                null, s, startX + (23 - s.Length * 4) / 2, startY + 6, new ColorBGRA(255, 255, 255, 255));
+                            Text.text = s;
+                            Text.X = startX + (24 - s.Length * 4) / 2;
+                            Text.Y = startY + 6;
+                            Text.Color = new ColorBGRA(255, 255, 255, 255);
+                            Text.OnEndScene();
                         }
 
                         var darkColor = (t > 0) ? new ColorBGRA(168, 98, 0, 255) : new ColorBGRA(0, 130, 15, 255);
@@ -280,19 +208,15 @@ namespace Tracker
                         {
                             for (var i = 0; i < 2; i++)
                             {
-                                ReadyLine.Draw(
-                                    new[]
-                                    {
-                                        new Vector2(startX, startY + i * 2),
-                                        new Vector2(startX + percent * 23, startY + i * 2)
-                                    },
-                                    i == 0 ? lightColor : darkColor);
+                                ReadyLine.Start = new Vector2(startX, startY + i * 2);
+                                ReadyLine.End = new Vector2(startX + percent * 23, startY + i * 2);
+                                ReadyLine.Color = i == 0 ? lightColor : darkColor;
+                                ReadyLine.OnEndScene();
                             }
                         }
 
                         startX = startX + 27;
                     }
-                    ReadyLine.End();
                 }
             }
             catch (Exception e)
