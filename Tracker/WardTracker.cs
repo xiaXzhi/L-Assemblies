@@ -64,7 +64,7 @@ namespace Tracker
 
     internal class DetectedWard
     {
-        private readonly float _scale = 0.7f;
+        private const float _scale = 0.7f;
         private Render.Circle _defaultCircle;
         private Render.Circle _defaultCircleFilled;
         private Render.Sprite _minimapSprite;
@@ -121,7 +121,7 @@ namespace Tracker
             get
             {
                 return Drawing.WorldToMinimap(Position) +
-                       new Vector2(-WardData.Bitmap.Width / 2 * _scale, -WardData.Bitmap.Height / 2 * _scale);
+                       new Vector2(-WardData.Bitmap.Width / 2f * _scale, -WardData.Bitmap.Height / 2f * _scale);
             }
         }
 
@@ -196,7 +196,7 @@ namespace Tracker
 
                 _timerText.TextUpdate =
                     () =>
-                        (IsFromMissile ? "?? " : "") + Utils.FormatTime((EndT - Environment.TickCount) / 1000f) +
+                        (IsFromMissile ? "?? " : "") + Utils.FormatTime((EndT - Utils.TickCount) / 1000f) +
                         (IsFromMissile ? " ??" : "");
                 _timerText.Add(2);
             }
@@ -235,6 +235,12 @@ namespace Tracker
         private static readonly List<WardData> PosibleWards = new List<WardData>();
         private static readonly List<DetectedWard> DetectedWards = new List<DetectedWard>();
         public static Menu Config;
+
+        public static List<Vector3> CrabWardPositions = new List<Vector3>
+        {
+            new Vector3(4400, 9600, -67),
+            new Vector3(10500, 5170, -63)
+        };
 
         static WardTracker()
         {
@@ -366,6 +372,15 @@ namespace Tracker
                     SpellName = "Bushwhack",
                     Type = WardType.Trap
                 });
+            PosibleWards.Add(
+                new WardData
+                {
+                    Duration = 79 * 1000,
+                    ObjectBaseSkinName = "sru_crabward",
+                    Range = 1100,
+                    SpellName = "",
+                    Type = WardType.Green
+                });
 
             #endregion
 
@@ -397,12 +412,12 @@ namespace Tracker
 
         private static void ObjSpellMissileOnOnCreate(GameObject sender, EventArgs args)
         {
-            if (!(sender is Obj_SpellMissile))
+            var missile = sender as MissileClient;
+
+            if (missile == null || !missile.IsValid)
             {
                 return;
             }
-
-            var missile = (Obj_SpellMissile) sender;
 
             if (!missile.SpellCaster.IsAlly)
             {
@@ -417,12 +432,12 @@ namespace Tracker
                                 !DetectedWards.Any(
                                     w =>
                                         w.Position.To2D().Distance(sPos.To2D(), ePos.To2D(), false, false) < 300 &&
-                                        Math.Abs(w.StartT - Environment.TickCount) < 2000))
+                                        Math.Abs(w.StartT - Utils.TickCount) < 2000))
                             {
                                 var detectedWard = new DetectedWard(
                                     PosibleWards[3],
                                     new Vector3(ePos.X, ePos.Y, NavMesh.GetHeightForPosition(ePos.X, ePos.Y)),
-                                    Environment.TickCount, null, true);
+                                    Utils.TickCount, null, true);
                                 detectedWard.StartPosition = new Vector3(
                                     sPos.X, sPos.Y, NavMesh.GetHeightForPosition(sPos.X, sPos.Y));
                                 DetectedWards.Add(detectedWard);
@@ -434,28 +449,32 @@ namespace Tracker
 
         private static void Obj_AI_Base_OnCreate(GameObject sender, EventArgs args)
         {
-            if (!(sender is Obj_AI_Base))
-            {
-                return;
-            }
-            var wardObject = (Obj_AI_Base) sender;
+            var wardObject = sender as Obj_AI_Base;
 
-            if (sender.IsAlly)
+            if (wardObject == null || !wardObject.IsValid || wardObject.IsAlly)
             {
                 return;
             }
 
             foreach (var wardData in PosibleWards)
             {
-                if (String.Equals(
-                    wardObject.BaseSkinName, wardData.ObjectBaseSkinName, StringComparison.InvariantCultureIgnoreCase))
+                if (string.Equals(
+                    wardObject.CharData.BaseSkinName, wardData.ObjectBaseSkinName,
+                    StringComparison.InvariantCultureIgnoreCase))
                 {
-                    var startT = Environment.TickCount - (int) ((wardObject.MaxMana - wardObject.Mana) * 1000);
+                    var startT = Utils.TickCount - (int) ((wardObject.MaxMana - wardObject.Mana) * 1000);
                     DetectedWards.RemoveAll(
                         w =>
                             w.Position.Distance(wardObject.Position) < 200 &&
                             (Math.Abs(w.StartT - startT) < 1000 || wardData.Type != WardType.Green) && w.Remove());
-                    DetectedWards.Add(new DetectedWard(wardData, wardObject.Position, startT, wardObject));
+                    var position = wardObject.Position;
+
+                    if (wardData.ObjectBaseSkinName == "sru_crabward")
+                    {
+                        position = CrabWardPositions.MinOrDefault(p => p.Distance(wardObject.Position));
+                    }
+
+                    DetectedWards.Add(new DetectedWard(wardData, position, startT, wardObject));
                 }
             }
         }
@@ -469,21 +488,21 @@ namespace Tracker
 
             foreach (var wardData in PosibleWards)
             {
-                if (String.Equals(args.SData.Name, wardData.SpellName, StringComparison.InvariantCultureIgnoreCase))
+                if (string.Equals(args.SData.Name, wardData.SpellName, StringComparison.InvariantCultureIgnoreCase))
                 {
                     var endPosition = ObjectManager.Player.GetPath(args.End).ToList().Last();
-                    DetectedWards.Add(new DetectedWard(wardData, endPosition, Environment.TickCount));
+                    DetectedWards.Add(new DetectedWard(wardData, endPosition, Utils.TickCount));
                 }
             }
         }
 
         private static void GameOnOnGameUpdate(EventArgs args)
         {
-            //Delete the wards that expire:
-            DetectedWards.RemoveAll(w => w.EndT <= Environment.TickCount && w.Duration != int.MaxValue && w.Remove());
-
-            //Delete the wards that get destroyed:
-            DetectedWards.RemoveAll(w => w.WardObject != null && !w.WardObject.IsValid && w.Remove());
+            //Delete the wards that expire or wards that get destroyed:
+            DetectedWards.RemoveAll(
+                w =>
+                    (w.EndT <= Utils.TickCount && w.Duration != int.MaxValue && w.Remove()) ||
+                    (w.WardObject != null && !w.WardObject.IsValid && w.Remove()));
         }
     }
 }
