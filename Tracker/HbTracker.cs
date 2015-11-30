@@ -27,8 +27,6 @@ namespace Tracker
 
         public static Render.Line ReadyLine;
         public static Render.Text Text;
-        public static int X;
-        public static int Y;
         public static SpellSlot[] SummonerSpellSlots = { SpellSlot.Summoner1, SpellSlot.Summoner2 };
         public static SpellSlot[] SpellSlots = { SpellSlot.Q, SpellSlot.W, SpellSlot.E, SpellSlot.R };
         public static Menu Config;
@@ -37,7 +35,8 @@ namespace Tracker
         {
             "SummonerBarrier", "SummonerBoost", "SummonerClairvoyance",
             "SummonerDot", "SummonerExhaust", "SummonerFlash", "SummonerHaste", "SummonerHeal", "SummonerMana",
-            "SummonerOdinGarrison", "SummonerRevive", "SummonerSmite", "SummonerTeleport"
+            "SummonerOdinGarrison", "SummonerRevive", "SummonerSmite", "SummonerTeleport", "s5_summonersmiteduel",
+            "s5_summonersmiteplayerganker", "s5_summonersmitequick", "itemsmiteaoe"
         };
 
         static HbTracker()
@@ -136,14 +135,13 @@ namespace Tracker
                 foreach (var hero in
                     HeroManager.AllHeroes.Where(
                         hero =>
-                            hero != null && hero.IsValid && !hero.IsMe && hero.IsHPBarRendered &&
+                            hero.IsValid && !hero.IsMe && hero.IsHPBarRendered &&
                             (hero.IsEnemy && Config.Item("TrackEnemies").GetValue<bool>() ||
                              hero.IsAlly && Config.Item("TrackAllies").GetValue<bool>())))
                 {
-                    var indicator = new HpBarIndicator { Unit = hero };
-
-                    X = (int) indicator.Position.X;
-                    Y = (int) indicator.Position.Y;
+                    var pos = GetHPBarPositionWithOffset(hero);
+                    var X = (int) pos.X;
+                    var Y = (int) pos.Y;
 
                     var k = 0;
                     foreach (var sSlot in SummonerSpellSlots)
@@ -159,7 +157,7 @@ namespace Tracker
                         var percent = (Math.Abs(spell.Cooldown) > float.Epsilon) ? t / spell.Cooldown : 1f;
                         var n = (t > 0) ? (int) (19 * (1f - percent)) : 19;
                         var ts = TimeSpan.FromSeconds((int) t);
-                        var s = t > 60 ? string.Format("{0}:{1:D2}", ts.Minutes, ts.Seconds) : String.Format("{0:0}", t);
+                        var s = t > 60 ? string.Format("{0}:{1:D2}", ts.Minutes, ts.Seconds) : string.Format("{0:0}", t);
                         if (t > 0)
                         {
                             Text.text = s;
@@ -204,7 +202,7 @@ namespace Tracker
                         var darkColor = (t > 0) ? new ColorBGRA(168, 98, 0, 255) : new ColorBGRA(0, 130, 15, 255);
                         var lightColor = (t > 0) ? new ColorBGRA(235, 137, 0, 255) : new ColorBGRA(0, 168, 25, 255);
 
-                        if (hero.Spellbook.CanUseSpell(slot) != (SpellState) 12)
+                        if (hero.Spellbook.CanUseSpell(slot) != SpellState.NotLearned)
                         {
                             for (var i = 0; i < 2; i++)
                             {
@@ -225,27 +223,16 @@ namespace Tracker
             }
         }
 
-        internal class HpBarIndicator
+        private static Vector2 GetHPBarPositionWithOffset(Obj_AI_Base unit)
         {
-            internal Obj_AI_Hero Unit { get; set; }
-
-            private Vector2 Offset
+            if (unit == null || !unit.IsValid)
             {
-                get
-                {
-                    if (Unit != null)
-                    {
-                        return Unit.IsAlly ? new Vector2(-9, 14) : new Vector2(-9, 17);
-                    }
-
-                    return new Vector2();
-                }
+                return Vector2.Zero;
             }
 
-            internal Vector2 Position
-            {
-                get { return new Vector2(Unit.HPBarPosition.X + Offset.X, Unit.HPBarPosition.Y + Offset.Y); }
-            }
+            var offset = unit.IsAlly ? new Vector2(-9, 14) : new Vector2(-9, 17);
+            var hpPos = unit.HPBarPosition;
+            return new Vector2(hpPos.X + offset.X, hpPos.Y + offset.Y);
         }
     }
 }
