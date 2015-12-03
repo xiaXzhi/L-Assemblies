@@ -37,7 +37,8 @@ namespace Tracker
         {
             "SummonerBarrier", "SummonerBoost", "SummonerClairvoyance",
             "SummonerDot", "SummonerExhaust", "SummonerFlash", "SummonerHaste", "SummonerHeal", "SummonerMana",
-            "SummonerOdinGarrison", "SummonerRevive", "SummonerSmite", "SummonerTeleport"
+            "SummonerOdinGarrison", "SummonerRevive", "SummonerSmite", "SummonerTeleport", "s5_summonersmiteduel",
+            "s5_summonersmiteplayerganker", "s5_summonersmitequick", "itemsmiteaoe"
         };
 
         static HbTracker()
