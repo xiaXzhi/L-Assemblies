@@ -30,6 +30,7 @@ namespace Tracker
         public static SpellSlot[] SummonerSpellSlots = { SpellSlot.Summoner1, SpellSlot.Summoner2 };
         public static SpellSlot[] SpellSlots = { SpellSlot.Q, SpellSlot.W, SpellSlot.E, SpellSlot.R };
         public static Menu Config;
+        public static Bitmap CurrentHud = Resources.hud;
 
         public static string[] SummonersNames =
         {
@@ -43,12 +44,14 @@ namespace Tracker
         {
             try
             {
-                foreach (var sName in SummonersNames)
+                foreach (var sName in
+                    SummonersNames.Where(
+                        s => HeroManager.AllHeroes.Any(h => !h.GetSpellSlot(s).Equals(SpellSlot.Unknown))))
                 {
                     SummonerTextures.Add(sName, GetSummonerTexture(sName));
                 }
 
-                CdFrame = new Render.Sprite(Resources.hud, Vector2.Zero);
+                CdFrame = new Render.Sprite(CurrentHud, Vector2.Zero);
                 ReadyLine = new Render.Line(Vector2.Zero, Vector2.Zero, 2, Color.Black);
                 Text = new Render.Text("", Vector2.Zero, 13, Color.Black);
             }
@@ -65,6 +68,19 @@ namespace Tracker
             Config = menu.AddSubMenu(new Menu("CD Tracker", "CD Tracker"));
             Config.AddItem(new MenuItem("TrackAllies", "Track allies").SetValue(true));
             Config.AddItem(new MenuItem("TrackEnemies", "Track enemies").SetValue(true));
+            Config.AddItem(new MenuItem("XmasHud", "Use Christmas Theme").SetValue(true));
+            CurrentHud = Config.Item("XmasHud").IsActive() ? Resources.xmas_hud : Resources.hud;
+
+            if (Config.Item("XmasHud").IsActive())
+            {
+                CdFrame = new Render.Sprite(CurrentHud, Vector2.Zero);
+            }
+
+            Config.Item("XmasHud").ValueChanged += (sender, e) =>
+            {
+                CurrentHud = e.GetNewValue<bool>() ? Resources.xmas_hud : Resources.hud;
+                CdFrame = new Render.Sprite(CurrentHud, Vector2.Zero);
+            };
         }
 
         private static Render.Sprite GetSummonerTexture(string name)
@@ -144,50 +160,48 @@ namespace Tracker
                     var Y = (int) pos.Y;
 
                     var k = 0;
+
                     foreach (var sSlot in SummonerSpellSlots)
                     {
                         var spell = hero.Spellbook.GetSpell(sSlot);
-
-                        var texture = SummonerTextures.ContainsKey(spell.Name)
-                            ? SummonerTextures[spell.Name]
-                            : SummonerTextures["SummonerBarrier"];
-
+                        var texture = SummonerTextures[spell.Name];
                         var t = spell.CooldownExpires - Game.Time;
-
-                        var percent = (Math.Abs(spell.Cooldown) > float.Epsilon) ? t / spell.Cooldown : 1f;
-                        var n = (t > 0) ? (int) (19 * (1f - percent)) : 19;
+                        var percent = Math.Abs(spell.Cooldown) > float.Epsilon ? t / spell.Cooldown : 1f;
+                        var n = t > 0 ? (int) (19 * (1f - percent)) : 19;
                         var ts = TimeSpan.FromSeconds((int) t);
                         var s = t > 60 ? string.Format("{0}:{1:D2}", ts.Minutes, ts.Seconds) : string.Format("{0:0}", t);
+
                         if (t > 0)
                         {
                             Text.text = s;
                             Text.X = X - 5 - s.Length * 5;
                             Text.Y = Y + 1 + 13 * k;
-                            Text.Color = new ColorBGRA(255, 255, 255, 255);
+                            Text.Color = Color.White;
                             Text.OnEndScene();
                         }
 
-                        texture.X = X + 3;
+                        texture.X = X + 3 + (Config.Item("XmasHud").IsActive() ? 1 : 0);
                         texture.Y = Y + 1 + 13 * k;
-                        texture.Crop(new Rectangle(0, 12 * n, 12, 12));
+                        var crop = Config.Item("XmasHud").IsActive() ? 14 : 12;
+                        texture.Crop(new Rectangle(0, 12 * n, crop, 12));
                         texture.OnEndScene();
                         k++;
                     }
 
-                    CdFrame.X = X;
-                    CdFrame.Y = Y;
+                    var hudOffset = GetHudOffset();
+                    CdFrame.X = X + (int) hudOffset.X;
+                    CdFrame.Y = Y + (int) hudOffset.Y;
                     CdFrame.OnEndScene();
 
-                    var startX = X + 19;
-                    var startY = Y + 20;
+                    var miscOffset = GetMiscOffset();
+                    var startX = X + 19 + (int) miscOffset.X;
+                    var startY = Y + 20 + (int) miscOffset.Y;
 
                     foreach (var slot in SpellSlots)
                     {
                         var spell = hero.Spellbook.GetSpell(slot);
                         var t = spell.CooldownExpires - Game.Time;
-                        var percent = (t > 0 && Math.Abs(spell.Cooldown) > float.Epsilon)
-                            ? 1f - (t / spell.Cooldown)
-                            : 1f;
+                        var percent = t > 0 && Math.Abs(spell.Cooldown) > float.Epsilon ? 1f - t / spell.Cooldown : 1f;
 
                         if (t > 0 && t < 100)
                         {
@@ -195,16 +209,16 @@ namespace Tracker
                             Text.text = s;
                             Text.X = startX + (24 - s.Length * 4) / 2;
                             Text.Y = startY + 6;
-                            Text.Color = new ColorBGRA(255, 255, 255, 255);
+                            Text.Color = Color.White;
                             Text.OnEndScene();
                         }
 
-                        var darkColor = (t > 0) ? new ColorBGRA(168, 98, 0, 255) : new ColorBGRA(0, 130, 15, 255);
-                        var lightColor = (t > 0) ? new ColorBGRA(235, 137, 0, 255) : new ColorBGRA(0, 168, 25, 255);
+                        var darkColor = t > 0 ? new ColorBGRA(168, 98, 0, 255) : new ColorBGRA(0, 130, 15, 255);
+                        var lightColor = t > 0 ? new ColorBGRA(235, 137, 0, 255) : new ColorBGRA(0, 168, 25, 255);
 
                         if (hero.Spellbook.CanUseSpell(slot) != SpellState.NotLearned)
                         {
-                            for (var i = 0; i < 2; i++)
+                            for (var i = 0; i < 2 + (Config.Item("XmasHud").IsActive() ? 1 : 0); i++)
                             {
                                 ReadyLine.Start = new Vector2(startX, startY + i * 2);
                                 ReadyLine.End = new Vector2(startX + percent * 23, startY + i * 2);
@@ -221,6 +235,16 @@ namespace Tracker
             {
                 Console.WriteLine(@"/ff can't draw sprites: " + e);
             }
+        }
+
+        private static Vector2 GetHudOffset()
+        {
+            return Config.Item("XmasHud").IsActive() ? new Vector2(-10, -11) : Vector2.Zero;
+        }
+
+        public static Vector2 GetMiscOffset()
+        {
+            return Config.Item("XmasHud").IsActive() ? new Vector2(-2, -1) : Vector2.Zero;
         }
 
         private static Vector2 GetHPBarPositionWithOffset(Obj_AI_Base unit)
