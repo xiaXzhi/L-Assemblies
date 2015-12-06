@@ -153,16 +153,6 @@ namespace Tracker.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap SummonerClairvoyance {
-            get {
-                object obj = ResourceManager.GetObject("SummonerClairvoyance", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap SummonerDot {
             get {
                 object obj = ResourceManager.GetObject("SummonerDot", resourceCulture);
@@ -213,29 +203,9 @@ namespace Tracker.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap SummonerMana {
-            get {
-                object obj = ResourceManager.GetObject("SummonerMana", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap SummonerOdinGarrison {
             get {
                 object obj = ResourceManager.GetObject("SummonerOdinGarrison", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap SummonerRevive {
-            get {
-                object obj = ResourceManager.GetObject("SummonerRevive", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

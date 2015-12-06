@@ -34,10 +34,10 @@ namespace Tracker
 
         public static string[] SummonersNames =
         {
-            "SummonerBarrier", "SummonerBoost", "SummonerClairvoyance",
-            "SummonerDot", "SummonerExhaust", "SummonerFlash", "SummonerHaste", "SummonerHeal", "SummonerMana",
-            "SummonerOdinGarrison", "SummonerRevive", "SummonerSmite", "SummonerTeleport", "s5_summonersmiteduel",
-            "s5_summonersmiteplayerganker", "s5_summonersmitequick", "itemsmiteaoe"
+            "SummonerBarrier", "SummonerBoost", "SummonerDot", "SummonerExhaust",
+            "SummonerFlash", "SummonerHaste", "SummonerHeal", "SummonerOdinGarrison", "SummonerSmite",
+            "SummonerTeleport", "s5_summonersmiteduel", "s5_summonersmiteplayerganker", "s5_summonersmitequick",
+            "itemsmiteaoe"
         };
 
         static HbTracker()
@@ -45,8 +45,7 @@ namespace Tracker
             try
             {
                 foreach (var sName in
-                    SummonersNames.Where(
-                        s => HeroManager.AllHeroes.Any(h => !h.GetSpellSlot(s).Equals(SpellSlot.Unknown))))
+                    SummonersNames)
                 {
                     SummonerTextures.Add(sName, GetSummonerTexture(sName));
                 }
@@ -91,17 +90,8 @@ namespace Tracker
                 case "SummonerOdinGarrison":
                     bitmap = Resources.SummonerOdinGarrison;
                     break;
-                case "SummonerRevive":
-                    bitmap = Resources.SummonerRevive;
-                    break;
-                case "SummonerClairvoyance":
-                    bitmap = Resources.SummonerClairvoyance;
-                    break;
                 case "SummonerBoost":
                     bitmap = Resources.SummonerBoost;
-                    break;
-                case "SummonerMana":
-                    bitmap = Resources.SummonerMana;
                     break;
                 case "SummonerTeleport":
                     bitmap = Resources.SummonerTeleport;

@@ -1,7 +1,6 @@
 #region
 
 using System;
-using LeagueSharp;
 using LeagueSharp.Common;
 
 #endregion

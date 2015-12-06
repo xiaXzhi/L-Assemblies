@@ -33,23 +33,17 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="clipper_library">
-      <HintPath>..\..\..\..\Desktop\LeagueSharpLoader\bin\Release\System\clipper_library.dll</HintPath>
-    </Reference>
     <Reference Include="LeagueSharp">
-      <HintPath>..\..\..\..\Desktop\LeagueSharpLoader\bin\Release\System\LeagueSharp.dll</HintPath>
+      <HintPath>..\..\..\..\Downloads\LeagueSharp\System\LeagueSharp.dll</HintPath>
     </Reference>
     <Reference Include="LeagueSharp.Common">
-      <HintPath>..\..\..\..\Desktop\LeagueSharpLoader\bin\Release\System\LeagueSharp.Common.dll</HintPath>
+      <HintPath>..\..\..\..\Downloads\LeagueSharp\System\LeagueSharp.Common.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX">
-      <HintPath>..\..\..\..\Desktop\LeagueSharpLoader\bin\Release\System\SharpDX.dll</HintPath>
+      <HintPath>..\..\..\..\Downloads\LeagueSharp\System\SharpDX.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX.Direct3D9">
-      <HintPath>..\..\..\..\Desktop\LeagueSharpLoader\bin\Release\System\SharpDX.Direct3D9.dll</HintPath>
-    </Reference>
-    <Reference Include="SharpDX.XInput">
-      <HintPath>..\..\..\..\Desktop\LeagueSharpLoader\bin\Release\System\SharpDX.XInput.dll</HintPath>
+      <HintPath>..\..\..\..\Downloads\LeagueSharp\System\SharpDX.Direct3D9.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -91,9 +85,6 @@
     <None Include="Resources\SummonerBoost.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\SummonerClairvoyance.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\SummonerDot.png" />
   </ItemGroup>
   <ItemGroup>
@@ -103,13 +94,7 @@
     <None Include="Resources\SummonerFlash.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\SummonerMana.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\SummonerOdinGarrison.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\SummonerRevive.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\SummonerSmite.png" />
@@ -140,7 +125,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\s5_summonersmitequick.png" />
-  </ItemGroup>  
+  </ItemGroup>
   <ItemGroup>
     <None Include="Resources\xmas_hud.png" />
   </ItemGroup>
