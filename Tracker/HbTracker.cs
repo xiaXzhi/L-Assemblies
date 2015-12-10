@@ -154,7 +154,7 @@ namespace Tracker
                     foreach (var sSlot in SummonerSpellSlots)
                     {
                         var spell = hero.Spellbook.GetSpell(sSlot);
-                        var texture = SummonerTextures[spell.Name];
+                        var texture = SummonerTextures.ContainsKey(spell.Name) ? SummonerTextures[spell.Name] : SummonerTextures["SummonerBarrier"];
                         var t = spell.CooldownExpires - Game.Time;
                         var percent = Math.Abs(spell.Cooldown) > float.Epsilon ? t / spell.Cooldown : 1f;
                         var n = t > 0 ? (int) (19 * (1f - percent)) : 19;
