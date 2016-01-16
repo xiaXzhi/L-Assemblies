@@ -126,9 +126,6 @@
   <ItemGroup>
     <None Include="Resources\s5_summonersmitequick.png" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\xmas_hud.png" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>

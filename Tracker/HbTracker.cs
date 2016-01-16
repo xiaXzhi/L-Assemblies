@@ -67,19 +67,6 @@ namespace Tracker
             Config = menu.AddSubMenu(new Menu("CD Tracker", "CD Tracker"));
             Config.AddItem(new MenuItem("TrackAllies", "Track allies").SetValue(true));
             Config.AddItem(new MenuItem("TrackEnemies", "Track enemies").SetValue(true));
-            Config.AddItem(new MenuItem("XmasHud", "Use Christmas Theme").SetValue(true));
-            CurrentHud = Config.Item("XmasHud").IsActive() ? Resources.xmas_hud : Resources.hud;
-
-            if (Config.Item("XmasHud").IsActive())
-            {
-                CdFrame = new Render.Sprite(CurrentHud, Vector2.Zero);
-            }
-
-            Config.Item("XmasHud").ValueChanged += (sender, e) =>
-            {
-                CurrentHud = e.GetNewValue<bool>() ? Resources.xmas_hud : Resources.hud;
-                CdFrame = new Render.Sprite(CurrentHud, Vector2.Zero);
-            };
         }
 
         private static Render.Sprite GetSummonerTexture(string name)
@@ -170,22 +157,20 @@ namespace Tracker
                             Text.OnEndScene();
                         }
 
-                        texture.X = X + 3 + (Config.Item("XmasHud").IsActive() ? 1 : 0);
+                        texture.X = X + 3;
                         texture.Y = Y + 1 + 13 * k;
-                        var crop = Config.Item("XmasHud").IsActive() ? 14 : 12;
+                        var crop = 12;
                         texture.Crop(new Rectangle(0, 12 * n, crop, 12));
                         texture.OnEndScene();
                         k++;
                     }
 
-                    var hudOffset = GetHudOffset();
-                    CdFrame.X = X + (int) hudOffset.X;
-                    CdFrame.Y = Y + (int) hudOffset.Y;
+                    CdFrame.X = X;
+                    CdFrame.Y = Y;
                     CdFrame.OnEndScene();
-
-                    var miscOffset = GetMiscOffset();
-                    var startX = X + 19 + (int) miscOffset.X;
-                    var startY = Y + 20 + (int) miscOffset.Y;
+                    
+                    var startX = X + 19;
+                    var startY = Y + 20;
 
                     foreach (var slot in SpellSlots)
                     {
@@ -208,7 +193,7 @@ namespace Tracker
 
                         if (hero.Spellbook.CanUseSpell(slot) != SpellState.NotLearned)
                         {
-                            for (var i = 0; i < 2 + (Config.Item("XmasHud").IsActive() ? 1 : 0); i++)
+                            for (var i = 0; i < 2; i++)
                             {
                                 ReadyLine.Start = new Vector2(startX, startY + i * 2);
                                 ReadyLine.End = new Vector2(startX + percent * 23, startY + i * 2);
@@ -225,16 +210,6 @@ namespace Tracker
             {
                 Console.WriteLine(@"/ff can't draw sprites: " + e);
             }
-        }
-
-        private static Vector2 GetHudOffset()
-        {
-            return Config.Item("XmasHud").IsActive() ? new Vector2(-10, -11) : Vector2.Zero;
-        }
-
-        public static Vector2 GetMiscOffset()
-        {
-            return Config.Item("XmasHud").IsActive() ? new Vector2(-2, -1) : Vector2.Zero;
         }
 
         private static Vector2 GetHPBarPositionWithOffset(Obj_AI_Base unit)

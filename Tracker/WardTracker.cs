@@ -407,6 +407,7 @@ namespace Tracker
         {
             Config = menu.AddSubMenu(new Menu("Ward Tracker", "Ward Tracker"));
             Config.AddItem(new MenuItem("Details", "Show more info").SetValue(new KeyBind(16, KeyBindType.Press)));
+            Config.Item("Details").SetTooltip("Draw visible range of wards.");
             Config.AddItem(new MenuItem("Enabled", "Enabled").SetValue(true));
         }
 
