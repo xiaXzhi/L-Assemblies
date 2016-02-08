@@ -18,6 +18,7 @@ namespace Tracker
     {
         Green,
         Pink,
+        Blue,
         Trap
     }
 
@@ -37,6 +38,8 @@ namespace Tracker
                 {
                     case WardType.Green:
                         return Resources.Minimap_Ward_Green_Enemy;
+                    case WardType.Blue:
+                        return Resources.Minimap_Ward_Green_Enemy;
                     case WardType.Pink:
                         return Resources.Minimap_Ward_Pink_Enemy;
                     default:
@@ -55,6 +58,8 @@ namespace Tracker
                         return Color.Lime;
                     case WardType.Pink:
                         return Color.Magenta;
+                    case WardType.Blue:
+                        return Color.Blue;
                     default:
                         return Color.Red;
                 }
@@ -232,7 +237,7 @@ namespace Tracker
     /// </summary>
     public static class WardTracker
     {
-        private static readonly List<WardData> PosibleWards = new List<WardData>();
+        private static readonly List<WardData> PossibleWards = new List<WardData>();
         private static readonly List<DetectedWard> DetectedWards = new List<DetectedWard>();
         public static Menu Config;
 
@@ -246,39 +251,31 @@ namespace Tracker
         {
             //Add the posible wards and their detection type:
 
-            #region PosibleWards
+            #region PossibleWards
 
             //Trinkets:
-            PosibleWards.Add(
+            PossibleWards.Add(
                 new WardData
                 {
                     Duration = 60 * 1000,
-                    ObjectBaseSkinName = "YellowTrinket",
+                    ObjectBaseSkinName = "SightWard",
                     Range = 1100,
                     SpellName = "TrinketTotemLvl1",
                     Type = WardType.Green
                 });
-            PosibleWards.Add(
+
+            PossibleWards.Add(
                 new WardData
                 {
-                    Duration = 60 * 3 * 1000,
-                    ObjectBaseSkinName = "YellowTrinketUpgrade",
-                    Range = 1100,
-                    SpellName = "TrinketTotemLvl2",
-                    Type = WardType.Green
-                });
-            PosibleWards.Add(
-                new WardData
-                {
-                    Duration = 60 * 3 * 1000,
+                    Duration = int.MaxValue,
                     ObjectBaseSkinName = "SightWard",
                     Range = 1100,
-                    SpellName = "TrinketTotemLvl3",
-                    Type = WardType.Green
+                    SpellName = "TrinketOrbLvl3",
+                    Type = WardType.Blue
                 });
 
             //Ward items and normal wards:
-            PosibleWards.Add(
+            PossibleWards.Add(
                 new WardData
                 {
                     Duration = 60 * 3 * 1000,
@@ -287,7 +284,7 @@ namespace Tracker
                     SpellName = "SightWard",
                     Type = WardType.Green
                 });
-            PosibleWards.Add(
+            PossibleWards.Add(
                 new WardData
                 {
                     Duration = 60 * 3 * 1000,
@@ -296,36 +293,9 @@ namespace Tracker
                     SpellName = "ItemGhostWard",
                     Type = WardType.Green
                 });
-            PosibleWards.Add(
-                new WardData
-                {
-                    Duration = 60 * 3 * 1000,
-                    ObjectBaseSkinName = "SightWard",
-                    Range = 1100,
-                    SpellName = "wrigglelantern",
-                    Type = WardType.Green
-                });
-            PosibleWards.Add(
-                new WardData
-                {
-                    Duration = 60 * 3 * 1000,
-                    ObjectBaseSkinName = "SightWard",
-                    Range = 1100,
-                    SpellName = "ItemFeralFlare",
-                    Type = WardType.Green
-                });
 
             //Pinks:
-            PosibleWards.Add(
-                new WardData
-                {
-                    Duration = int.MaxValue,
-                    ObjectBaseSkinName = "VisionWard",
-                    Range = 1100,
-                    SpellName = "TrinketTotemLvl3B",
-                    Type = WardType.Pink
-                });
-            PosibleWards.Add(
+            PossibleWards.Add(
                 new WardData
                 {
                     Duration = int.MaxValue,
@@ -336,7 +306,7 @@ namespace Tracker
                 });
 
             //Traps
-            PosibleWards.Add(
+            PossibleWards.Add(
                 new WardData
                 {
                     Duration = 60 * 4 * 1000,
@@ -345,7 +315,7 @@ namespace Tracker
                     SpellName = "CaitlynYordleTrap",
                     Type = WardType.Trap
                 });
-            PosibleWards.Add(
+            PossibleWards.Add(
                 new WardData
                 {
                     Duration = 60 * 10 * 1000,
@@ -354,7 +324,7 @@ namespace Tracker
                     SpellName = "BantamTrap",
                     Type = WardType.Trap
                 });
-            PosibleWards.Add(
+            PossibleWards.Add(
                 new WardData
                 {
                     Duration = 60 * 1 * 1000,
@@ -363,7 +333,7 @@ namespace Tracker
                     SpellName = "JackInTheBox",
                     Type = WardType.Trap
                 });
-            PosibleWards.Add(
+            PossibleWards.Add(
                 new WardData
                 {
                     Duration = 60 * 2 * 1000,
@@ -372,7 +342,7 @@ namespace Tracker
                     SpellName = "Bushwhack",
                     Type = WardType.Trap
                 });
-            PosibleWards.Add(
+            PossibleWards.Add(
                 new WardData
                 {
                     Duration = 79 * 1000,
@@ -415,85 +385,98 @@ namespace Tracker
         {
             var missile = sender as MissileClient;
 
-            if (missile == null || !missile.IsValid)
+            if (missile == null || !missile.IsValid || missile.SpellCaster == null || missile.SpellCaster.IsAlly ||
+                missile.SData.Name != "itemplacementmissile" || missile.SpellCaster.IsVisible)
             {
                 return;
             }
 
-            if (!missile.SpellCaster.IsAlly)
-            {
-                if (missile.SData.Name == "itemplacementmissile" && !missile.SpellCaster.IsVisible)
+            var sPos = missile.StartPosition;
+            var ePos = missile.EndPosition;
+            Utility.DelayAction.Add(
+                1000, delegate
                 {
-                    var sPos = missile.StartPosition;
-                    var ePos = missile.EndPosition;
-                    Utility.DelayAction.Add(
-                        1000, delegate
-                        {
-                            if (
-                                !DetectedWards.Any(
-                                    w =>
-                                        w.Position.To2D().Distance(sPos.To2D(), ePos.To2D(), false, false) < 300 &&
-                                        Math.Abs(w.StartT - Utils.TickCount) < 2000))
-                            {
-                                var detectedWard = new DetectedWard(
-                                    PosibleWards[3],
-                                    new Vector3(ePos.X, ePos.Y, NavMesh.GetHeightForPosition(ePos.X, ePos.Y)),
-                                    Utils.TickCount, null, true);
-                                detectedWard.StartPosition = new Vector3(
-                                    sPos.X, sPos.Y, NavMesh.GetHeightForPosition(sPos.X, sPos.Y));
-                                DetectedWards.Add(detectedWard);
-                            }
-                        });
-                }
-            }
+                    if (
+                        DetectedWards.Any(
+                            w =>
+                                w.Position.To2D().Distance(sPos.To2D(), ePos.To2D(), false, false) < 300 &&
+                                Math.Abs(w.StartT - Utils.TickCount) < 2000))
+                    {
+                        return;
+                    }
+
+                    var detectedWard = new DetectedWard(
+                        PossibleWards[3], new Vector3(ePos.X, ePos.Y, NavMesh.GetHeightForPosition(ePos.X, ePos.Y)),
+                        Utils.TickCount, null, true)
+                    {
+                        StartPosition = new Vector3(sPos.X, sPos.Y, NavMesh.GetHeightForPosition(sPos.X, sPos.Y))
+                    };
+
+                    DetectedWards.Add(detectedWard);
+                });
         }
 
         private static void Obj_AI_Base_OnCreate(GameObject sender, EventArgs args)
         {
             var wardObject = sender as Obj_AI_Base;
 
-            if (wardObject == null || !wardObject.IsValid || wardObject.IsAlly)
+            if (wardObject == null || !wardObject.IsValid || wardObject.IsAlly ||
+                sender.Name.ToLower().Contains("corpse"))
             {
                 return;
             }
 
-            foreach (var wardData in PosibleWards)
+            foreach (var wardData in PossibleWards)
             {
-                if (string.Equals(
-                    wardObject.CharData.BaseSkinName, wardData.ObjectBaseSkinName,
-                    StringComparison.InvariantCultureIgnoreCase))
+                if (
+                    !string.Equals(
+                        wardObject.CharData.BaseSkinName, wardData.ObjectBaseSkinName,
+                        StringComparison.InvariantCultureIgnoreCase))
                 {
-                    var startT = Utils.TickCount - (int) ((wardObject.MaxMana - wardObject.Mana) * 1000);
-                    DetectedWards.RemoveAll(
-                        w =>
-                            w.Position.Distance(wardObject.Position) < 200 &&
-                            (Math.Abs(w.StartT - startT) < 1000 || wardData.Type != WardType.Green) && w.Remove());
-                    var position = wardObject.Position;
-
-                    if (wardData.ObjectBaseSkinName == "sru_crabward")
-                    {
-                        position = CrabWardPositions.MinOrDefault(p => p.Distance(wardObject.Position));
-                    }
-
-                    DetectedWards.Add(new DetectedWard(wardData, position, startT, wardObject));
+                    continue;
                 }
+
+                var startT = Utils.TickCount - (int) ((wardObject.MaxMana - wardObject.Mana) * 1000);
+                DetectedWards.RemoveAll(
+                    w =>
+                        w.Position.Distance(wardObject.Position) < 200 &&
+                        (Math.Abs(w.StartT - startT) < 1000 || wardData.Type != WardType.Green) && w.Remove());
+                var position = wardObject.Position;
+
+                if (wardData.ObjectBaseSkinName == "sru_crabward")
+                {
+                    position = CrabWardPositions.MinOrDefault(p => p.Distance(wardObject.Position));
+                }
+
+                DetectedWards.Add(new DetectedWard(wardData, position, startT, wardObject));
+                break;
             }
         }
 
         private static void Obj_AI_Hero_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-            if (sender.IsAlly)
+            var hero = sender as Obj_AI_Hero;
+
+            if (hero == null || sender.IsAlly)
             {
                 return;
             }
 
-            foreach (var wardData in PosibleWards)
+            foreach (var wardData in PossibleWards)
             {
-                if (string.Equals(args.SData.Name, wardData.SpellName, StringComparison.InvariantCultureIgnoreCase))
+                if (!string.Equals(args.SData.Name, wardData.SpellName, StringComparison.InvariantCultureIgnoreCase))
                 {
-                    var endPosition = ObjectManager.Player.GetPath(args.End).ToList().Last();
-                    DetectedWards.Add(new DetectedWard(wardData, endPosition, Utils.TickCount));
+                    continue;
                 }
+
+                if (wardData.SpellName.Contains("TrinketTotem"))
+                {
+                    wardData.Duration = 60 + (int) Math.Round(3.5 * (hero.Level - 1));
+                }
+
+                var endPosition = ObjectManager.Player.GetPath(args.End).ToList().Last();
+                DetectedWards.Add(new DetectedWard(wardData, endPosition, Utils.TickCount));
+                break;
             }
         }
 

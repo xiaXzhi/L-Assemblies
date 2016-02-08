@@ -30,7 +30,6 @@ namespace Tracker
         public static SpellSlot[] SummonerSpellSlots = { SpellSlot.Summoner1, SpellSlot.Summoner2 };
         public static SpellSlot[] SpellSlots = { SpellSlot.Q, SpellSlot.W, SpellSlot.E, SpellSlot.R };
         public static Menu Config;
-        public static Bitmap CurrentHud = Resources.hud;
 
         public static string[] SummonersNames =
         {
@@ -50,7 +49,7 @@ namespace Tracker
                     SummonerTextures.Add(sName, GetSummonerTexture(sName));
                 }
 
-                CdFrame = new Render.Sprite(CurrentHud, Vector2.Zero);
+                CdFrame = new Render.Sprite(Resources.hud, Vector2.Zero);
                 ReadyLine = new Render.Line(Vector2.Zero, Vector2.Zero, 2, Color.Black);
                 Text = new Render.Text("", Vector2.Zero, 13, Color.Black);
             }
@@ -141,7 +140,9 @@ namespace Tracker
                     foreach (var sSlot in SummonerSpellSlots)
                     {
                         var spell = hero.Spellbook.GetSpell(sSlot);
-                        var texture = SummonerTextures.ContainsKey(spell.Name) ? SummonerTextures[spell.Name] : SummonerTextures["SummonerBarrier"];
+                        var texture = SummonerTextures.ContainsKey(spell.Name)
+                            ? SummonerTextures[spell.Name]
+                            : SummonerTextures["SummonerBarrier"];
                         var t = spell.CooldownExpires - Game.Time;
                         var percent = Math.Abs(spell.Cooldown) > float.Epsilon ? t / spell.Cooldown : 1f;
                         var n = t > 0 ? (int) (19 * (1f - percent)) : 19;
@@ -168,7 +169,7 @@ namespace Tracker
                     CdFrame.X = X;
                     CdFrame.Y = Y;
                     CdFrame.OnEndScene();
-                    
+
                     var startX = X + 19;
                     var startY = Y + 20;
 
@@ -212,14 +213,16 @@ namespace Tracker
             }
         }
 
-        private static Vector2 GetHPBarPositionWithOffset(Obj_AI_Base unit)
+        private static Vector2 GetHPBarPositionWithOffset(Obj_AI_Hero unit)
         {
             if (unit == null || !unit.IsValid)
             {
                 return Vector2.Zero;
             }
 
-            var offset = unit.IsAlly ? new Vector2(-9, 14) : new Vector2(-9, 17);
+            var teamOffset = unit.IsAlly ? new Vector2(-9, 14) : new Vector2(-9, 17);
+            var champOffset = unit.ChampionName == "Jhin" ? new Vector2(-8, -14) : Vector2.Zero;
+            var offset = teamOffset + champOffset;
             var hpPos = unit.HPBarPosition;
             return new Vector2(hpPos.X + offset.X, hpPos.Y + offset.Y);
         }
