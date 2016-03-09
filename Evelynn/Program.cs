@@ -22,7 +22,6 @@ namespace Evelynn
         //Spells
         public static List<Spell> SpellList = new List<Spell>();
 
-
         public static Spell Q;
         public static Spell W;
         public static Spell E;
