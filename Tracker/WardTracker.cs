@@ -239,6 +239,8 @@ namespace Tracker
     {
         private static readonly List<WardData> PossibleWards = new List<WardData>();
         private static readonly List<DetectedWard> DetectedWards = new List<DetectedWard>();
+        private static readonly List<string> WardObjectNames = new List<string>();
+
         public static Menu Config;
 
         public static List<Vector3> CrabWardPositions = new List<Vector3>
@@ -269,7 +271,7 @@ namespace Tracker
                 {
                     Duration = int.MaxValue,
                     ObjectBaseSkinName = "SightWard",
-                    Range = 1100,
+                    Range = 605,
                     SpellName = "TrinketOrbLvl3",
                     Type = WardType.Blue
                 });
@@ -287,7 +289,7 @@ namespace Tracker
             PossibleWards.Add(
                 new WardData
                 {
-                    Duration = 60 * 3 * 1000,
+                    Duration = 150 * 1000,
                     ObjectBaseSkinName = "SightWard",
                     Range = 1100,
                     SpellName = "ItemGhostWard",
@@ -354,6 +356,11 @@ namespace Tracker
 
             #endregion
 
+            foreach (var ward in PossibleWards)
+            {
+                WardObjectNames.Add(ward.ObjectBaseSkinName);
+            }
+
             //Used for removing the wards that expire:
             Game.OnUpdate += GameOnOnGameUpdate;
 
@@ -365,12 +372,6 @@ namespace Tracker
 
             //Used to detect the ward missile when neither the unit or the ward are visible:
             GameObject.OnCreate += ObjSpellMissileOnOnCreate;
-
-            //Process the detected ward objects on the map.
-            foreach (var obj in ObjectManager.Get<GameObject>().Where(o => o is Obj_AI_Base))
-            {
-                Obj_AI_Base_OnCreate(obj, null);
-            }
         }
 
         public static void AttachToMenu(Menu menu)
@@ -385,8 +386,9 @@ namespace Tracker
         {
             var missile = sender as MissileClient;
 
-            if (missile == null || !missile.IsValid || missile.SpellCaster == null || missile.SpellCaster.IsAlly ||
-                missile.SData.Name != "itemplacementmissile" || missile.SpellCaster.IsVisible)
+            if (missile == null || !missile.IsValid || !missile.SpellCaster.IsValid<Obj_AI_Hero>() ||
+                missile.SpellCaster.IsAlly || missile.SpellCaster.IsVisible ||
+                missile.SData.Name != "itemplacementmissile")
             {
                 return;
             }
@@ -421,36 +423,41 @@ namespace Tracker
             var wardObject = sender as Obj_AI_Base;
 
             if (wardObject == null || !wardObject.IsValid || wardObject.IsAlly ||
-                sender.Name.ToLower().Contains("corpse"))
+                !WardObjectNames.Contains(wardObject.CharData.BaseSkinName))
+
             {
                 return;
             }
 
-            foreach (var wardData in PossibleWards)
-            {
-                if (
-                    !string.Equals(
-                        wardObject.CharData.BaseSkinName, wardData.ObjectBaseSkinName,
-                        StringComparison.InvariantCultureIgnoreCase))
-                {
-                    continue;
-                }
+            var wardData =
+                PossibleWards.FirstOrDefault(o => string.Equals(wardObject.CharData.BaseSkinName, o.ObjectBaseSkinName));
 
-                var startT = Utils.TickCount - (int) ((wardObject.MaxMana - wardObject.Mana) * 1000);
-                DetectedWards.RemoveAll(
+            if (wardData == null)
+            {
+                return;
+            }
+
+            var startT = Utils.TickCount - (int) ((wardObject.MaxMana - wardObject.Mana) * 1000);
+            var detectedWard =
+                DetectedWards.FirstOrDefault(
                     w =>
                         w.Position.Distance(wardObject.Position) < 200 &&
-                        (Math.Abs(w.StartT - startT) < 1000 || wardData.Type != WardType.Green) && w.Remove());
-                var position = wardObject.Position;
+                        (Math.Abs(w.StartT - startT) < 1000 || wardData.Type != WardType.Green));
 
-                if (wardData.ObjectBaseSkinName == "sru_crabward")
-                {
-                    position = CrabWardPositions.MinOrDefault(p => p.Distance(wardObject.Position));
-                }
+            var position = wardObject.Position;
 
-                DetectedWards.Add(new DetectedWard(wardData, position, startT, wardObject));
-                break;
+            if (detectedWard != null)
+            {
+                wardData.Duration = detectedWard.Duration;
+                detectedWard.Remove();
             }
+
+            if (wardData.ObjectBaseSkinName == "sru_crabward")
+            {
+                position = CrabWardPositions.MinOrDefault(p => p.Distance(wardObject.Position));
+            }
+
+            DetectedWards.Add(new DetectedWard(wardData, position, startT, wardObject));
         }
 
         private static void Obj_AI_Hero_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
@@ -462,22 +469,22 @@ namespace Tracker
                 return;
             }
 
-            foreach (var wardData in PossibleWards)
+            var wardData =
+                PossibleWards.FirstOrDefault(
+                    w => string.Equals(args.SData.Name, w.SpellName, StringComparison.InvariantCultureIgnoreCase));
+
+            if (wardData == null)
             {
-                if (!string.Equals(args.SData.Name, wardData.SpellName, StringComparison.InvariantCultureIgnoreCase))
-                {
-                    continue;
-                }
-
-                if (wardData.SpellName.Contains("TrinketTotem"))
-                {
-                    wardData.Duration = 60 + (int) Math.Round(3.5 * (hero.Level - 1));
-                }
-
-                var endPosition = ObjectManager.Player.GetPath(args.End).ToList().Last();
-                DetectedWards.Add(new DetectedWard(wardData, endPosition, Utils.TickCount));
-                break;
+                return;
             }
+
+            if (wardData.SpellName.Contains("TrinketTotem"))
+            {
+                wardData.Duration = 1000 * (60 + (int) Math.Round(3.5 * (hero.Level - 1)));
+            }
+
+            var endPosition = ObjectManager.Player.GetPath(args.End).ToList().Last();
+            DetectedWards.Add(new DetectedWard(wardData, endPosition, Utils.TickCount));
         }
 
         private static void GameOnOnGameUpdate(EventArgs args)
