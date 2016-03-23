@@ -311,7 +311,7 @@ namespace Tracker
             PossibleWards.Add(
                 new WardData
                 {
-                    Duration = 60 * 4 * 1000,
+                    Duration = 90 * 1000,
                     ObjectBaseSkinName = "CaitlynTrap",
                     Range = 300,
                     SpellName = "CaitlynYordleTrap",
